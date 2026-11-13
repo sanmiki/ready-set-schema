@@ -8,6 +8,13 @@
       "when": 1794611114849,
       "tag": "0000_create_rewear_marketplace_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794611135282,
+      "tag": "0001_storage_policies_for_rewear_media",
+      "breakpoints": true
     }
   ]
 }
