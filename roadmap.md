@@ -4,18 +4,19 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 (plus the uploaded home page `user-uploads://index.tsx`, which is the design to preserve).
 
 ## Done
-- [x] Cloud, Storage, Auth connected; email/password enabled; signup auto-confirms (user chose "straight in"); Lovable + Google sign-in providers on.
-- [x] Database migration: profiles, categories, products, product_images + RLS + grants + profile trigger.
+- [x] Cloud, Storage, Auth connected; email/password enabled; signup goes straight in (user chose "straight in"); Lovable + Google sign-in providers on.
+- [x] Database: profiles, categories, products, product_images + RLS + grants + profile trigger; categories seeded.
+- [x] Private photo storage with owner-only upload rules; public photos served through a same-origin address that only hands out a link for a live listing.
+- [x] Site chrome: header/footer, sage/neutral palette, Georgian fonts, product card, categories from the database.
+- [x] Home page: real live products (featured + recently added), real brands, Georgian empty state.
+- [x] Catalog: search, category/brand/size/condition/city/price filters and sorting — all on real data.
+- [x] Product page: photo gallery, seller card, owner edit/delete controls, related items.
+- [x] Sell form: photo upload, every field, Georgian validation; publish → product page; edit opens filled in; delete with confirmation.
+- [x] Auth pages: sign in / sign up, password reset with its own page, protected sell / profile / my items.
+- [x] Profile edit: username, display name, avatar, city, bio.
+- [x] No demo listings, no demo-only notices; empty states in Georgian.
+- [x] Tests: every page has a route, price cannot be negative, title required, only the offered conditions, password length, username format.
+- [x] Browser verification: register → publish with photos → catalog → product → edit price → profile save → reserve → publish again → sign out.
 
 ## Open
-- [ ] Storage bucket for product photos + avatars, with owner-only upload policies.
-- [ ] Site chrome: header/footer, design tokens (sage/neutral palette, Georgian fonts), ProductCard, category data from DB.
-- [ ] Home page: real active products (featured + recently added), real brands, empty state.
-- [ ] Catalog: search, category/brand/size/condition/city/price filters, sorting — all on real data.
-- [ ] Product detail page by ID: gallery, seller info, owner edit/delete controls.
-- [ ] Sell form: photo upload to Storage + all fields + validation with Georgian errors; publish → redirect to new product page; edit + delete own listings.
-- [ ] Auth pages: sign in / sign up, password reset, protected routes (sell, profile, my items).
-- [ ] Profile edit: username, display name, avatar, city, bio.
-- [ ] Remove demo data / demo-only notices; Georgian empty states.
-- [ ] Tests for the rules the brief states (price non-negative, status values, required fields, routing).
-- [ ] End-to-end verification in the browser: register → publish with photo → catalog → refresh → second user cannot edit.
+- [ ] Google sign-in round trip in a real browser — needs a person to finish Google's account picker; the button and provider are in place.

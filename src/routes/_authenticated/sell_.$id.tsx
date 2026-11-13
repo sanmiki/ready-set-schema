@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ListingForm } from "@/components/site/ListingForm";
 import { categoriesQuery, myListingQuery } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/sell/$id")({
+export const Route = createFileRoute("/_authenticated/sell_/$id")({
   head: () => ({
     meta: [
       { title: "ნივთის რედაქტირება · ReWear" },
