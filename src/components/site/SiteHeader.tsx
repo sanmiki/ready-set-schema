@@ -14,10 +14,9 @@ import {
 import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 
-const NAV = [
-  { to: "/", label: "მთავარი" },
-  { to: "/catalog", label: "კატალოგი" },
-] as const;
+const navClass =
+  "rounded-full px-3 py-2 text-muted-foreground transition hover:bg-sage-soft hover:text-foreground";
+const activeNavClass = "rounded-full px-3 py-2 bg-sage-soft text-foreground";
 
 export function SiteHeader() {
   const { user } = useSession();
@@ -40,30 +39,32 @@ export function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-1 text-sm">
-          {NAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              search={item.to === "/catalog" ? {} : undefined}
-              className="rounded-full px-3 py-2 text-muted-foreground transition hover:bg-sage-soft hover:text-foreground"
-              activeProps={{ className: "rounded-full px-3 py-2 bg-sage-soft text-foreground" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <Link
-            to={user ? "/sell" : "/auth"}
-            search={user ? undefined : { redirect: "/sell" }}
-            className="rounded-full px-3 py-2 text-muted-foreground transition hover:bg-sage-soft hover:text-foreground"
-          >
-            გაყიდე ნივთი
+          <Link to="/" className={navClass} activeProps={{ className: activeNavClass }} end>
+            მთავარი
           </Link>
-          {user && (
+          <Link
+            to="/catalog"
+            search={{}}
+            className={navClass}
+            activeProps={{ className: activeNavClass }}
+          >
+            კატალოგი
+          </Link>
+          {user ? (
+            <Link to="/sell" className={navClass}>
+              გაყიდე ნივთი
+            </Link>
+          ) : (
             <Link
-              to="/my-items"
-              className="rounded-full px-3 py-2 text-muted-foreground transition hover:bg-sage-soft hover:text-foreground"
-              activeProps={{ className: "rounded-full px-3 py-2 bg-sage-soft text-foreground" }}
+              to="/auth"
+              search={{ redirect: "/sell" }}
+              className={navClass}
             >
+              გაყიდე ნივთი
+            </Link>
+          )}
+          {user && (
+            <Link to="/my-items" className={navClass} activeProps={{ className: activeNavClass }}>
               ჩემი ნივთები
             </Link>
           )}
@@ -104,7 +105,9 @@ export function SiteHeader() {
         ) : (
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="rounded-full">
-              <Link to="/auth">შესვლა</Link>
+              <Link to="/auth" search={{}}>
+                შესვლა
+              </Link>
             </Button>
             <Button asChild size="sm" className="rounded-full">
               <Link to="/auth" search={{ mode: "signup" }}>
