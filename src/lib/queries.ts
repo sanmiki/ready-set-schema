@@ -8,6 +8,7 @@ import {
   listRelatedListings,
 } from "./catalog.functions";
 import { getMyListing, getMyProfile, listMyListings } from "./seller.functions";
+import { listMyFavorites } from "./favorites.functions";
 import type { ListingQuery } from "./types";
 
 export const categoriesQuery = queryOptions({
@@ -52,4 +53,9 @@ export const myListingQuery = (id: string) =>
 export const myProfileQuery = queryOptions({
   queryKey: ["my-profile"],
   queryFn: () => getMyProfile(),
+});
+
+export const myFavoritesQuery = queryOptions({
+  queryKey: ["my-favorites"],
+  queryFn: () => listMyFavorites(),
 });

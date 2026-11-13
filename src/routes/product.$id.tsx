@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
+import { FavoriteButton } from "@/components/site/FavoriteButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,7 +133,10 @@ function ProductPage() {
 
         <div>
           <p className="text-sm text-sage-deep">{listing.category?.name ?? "ნივთი"}</p>
-          <h1 className="mt-1 text-3xl md:text-4xl">{listing.title}</h1>
+          <div className="mt-1 flex items-start justify-between gap-3">
+            <h1 className="text-3xl md:text-4xl">{listing.title}</h1>
+            <FavoriteButton productId={listing.id} className="h-11 w-11 shrink-0 border border-border" />
+          </div>
           <p className="mt-3 text-2xl font-semibold">{formatPrice(listing.price)}</p>
 
           <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">

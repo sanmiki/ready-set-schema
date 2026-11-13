@@ -91,6 +91,9 @@ export function SiteHeader() {
                 <Link to="/profile">პროფილი</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link to="/favorites">რჩეულები</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/my-items">ჩემი ნივთები</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
