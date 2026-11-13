@@ -19,6 +19,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell.$id'
+import { Route as ApiPublicMediaRouteImport } from './routes/api/public/media'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -69,6 +70,11 @@ const AuthenticatedSellIdRoute = AuthenticatedSellIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AuthenticatedSellRoute,
 } as any)
+const ApiPublicMediaRoute = ApiPublicMediaRouteImport.update({
+  id: '/api/public/media',
+  path: '/api/public/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
+  '/api/public/media': typeof ApiPublicMediaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
+  '/api/public/media': typeof ApiPublicMediaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
   '/_authenticated/sell/$id': typeof AuthenticatedSellIdRoute
+  '/api/public/media': typeof ApiPublicMediaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/product/$id'
     | '/sell/$id'
+    | '/api/public/media'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/product/$id'
     | '/sell/$id'
+    | '/api/public/media'
   id:
     | '__root__'
     | '/'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sell'
     | '/product/$id'
     | '/_authenticated/sell/$id'
+    | '/api/public/media'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,6 +161,7 @@ export interface RootRouteChildren {
   CatalogRoute: typeof CatalogRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicMediaRoute: typeof ApiPublicMediaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -223,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSellIdRouteImport
       parentRoute: typeof AuthenticatedSellRoute
     }
+    '/api/public/media': {
+      id: '/api/public/media'
+      path: '/api/public/media'
+      fullPath: '/api/public/media'
+      preLoaderRoute: typeof ApiPublicMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   CatalogRoute: CatalogRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicMediaRoute: ApiPublicMediaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

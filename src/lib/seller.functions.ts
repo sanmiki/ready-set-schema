@@ -218,7 +218,7 @@ export const listMyListings = createServerFn({ method: "GET" })
       .eq("seller_id", context.userId)
       .order("created_at", { ascending: false });
 
-    return hydrateListings(context.supabase, rows ?? []);
+    return hydrateListings(context.supabase, rows ?? [], "signed");
   });
 
 export const getMyListing = createServerFn({ method: "GET" })
@@ -233,7 +233,7 @@ export const getMyListing = createServerFn({ method: "GET" })
       .maybeSingle();
 
     if (!row) return null;
-    const [listing] = await hydrateListings(context.supabase, [row]);
+    const [listing] = await hydrateListings(context.supabase, [row], "signed");
     return listing ?? null;
   });
 
