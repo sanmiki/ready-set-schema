@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { authFormSchema, firstMessage, passwordSchema } from "@/lib/validation";
+import { firstMessage, signInSchema, signUpSchema } from "@/lib/validation";
 
 type AuthSearch = {
   mode?: "signin" | "signup" | undefined;
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const navigate = useNavigate();
-  const { user, loading } = useSession();
+  const { user, ready } = useSession();
 
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
   const [email, setEmail] = useState("");
@@ -77,16 +77,18 @@ function AuthPage() {
   }
 
   useEffect(() => {
-    if (!loading && user) finish();
+    if (ready && user) finish();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, user]);
+  }, [ready, user]);
 
   async function handleEmailSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
 
-    const schema = mode === "signup" ? authFormSchema : authFormSchema.pick({ email: true, password: true });
-    const parsed = schema.safeParse({ email, password, display_name: displayName });
+    const parsed =
+      mode === "signup"
+        ? signUpSchema.safeParse({ email, password, display_name: displayName })
+        : signInSchema.safeParse({ email, password });
     if (!parsed.success) {
       const message = firstMessage(parsed.error);
       setError(message);
@@ -113,7 +115,10 @@ function AuthPage() {
         password: parsed.data.password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: { display_name: parsed.data.display_name ?? "" },
+          data: {
+            display_name:
+              "display_name" in parsed.data ? (parsed.data.display_name ?? "") : "",
+          },
         },
       });
 
@@ -235,9 +240,7 @@ function AuthPage() {
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
             />
             {mode === "signup" && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                მინიმუმ {passwordSchema.shape.password.minLength} სიმბოლო.
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">მინიმუმ 8 სიმბოლო.</p>
             )}
           </div>
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { firstMessage, passwordSchema } from "@/lib/validation";
+import { firstMessage, newPasswordSchema } from "@/lib/validation";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
@@ -48,9 +48,13 @@ function ResetPasswordPage() {
     event.preventDefault();
     setError(null);
 
-    const parsed = passwordSchema.safeParse({ password, confirm });
+    const parsed = newPasswordSchema.safeParse({ password });
     if (!parsed.success) {
       setError(firstMessage(parsed.error));
+      return;
+    }
+    if (password !== confirm) {
+      setError("ორი პაროლი ერთმანეთს არ ემთხვევა.");
       return;
     }
 

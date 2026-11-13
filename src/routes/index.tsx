@@ -10,7 +10,7 @@ import catKids from "@/assets/cat-kids.jpg";
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
 import { categoriesQuery, facetsQuery, listingsQuery } from "@/lib/queries";
-import type { Category } from "@/lib/types";
+import type { Category, Listing } from "@/lib/types";
 
 const categoryImages: Record<string, string> = {
   women: catWomen,
@@ -196,7 +196,7 @@ function CategoryTile({ category }: { category: Category }) {
   );
 }
 
-function Section({ title, items }: { title: string; items: ReturnType<typeof useSuspenseQuery>["data"] }) {
+function Section({ title, items }: { title: string; items: Listing[] }) {
   return (
     <section className="container-page mt-14">
       <div className="mb-5 flex items-end justify-between">
