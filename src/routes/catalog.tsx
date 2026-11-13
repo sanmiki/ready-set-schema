@@ -39,29 +39,31 @@ function toQuery(search: CatalogSearch): ListingQuery {
   };
 }
 
-export const Route = createFileRoute("/catalog")({
-  validateSearch: (raw): CatalogSearch => {
-    const text = (value: unknown) =>
-      typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-    const amount = (value: unknown) => {
-      const parsed = typeof value === "number" ? value : Number(value);
-      return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
-    };
-    const sort = (value: unknown): Sort | undefined =>
-      value === "new" || value === "price_asc" || value === "price_desc" ? value : undefined;
+function parseCatalogSearch(raw: Record<string, unknown>): CatalogSearch {
+  const text = (value: unknown) =>
+    typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+  const amount = (value: unknown) => {
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+  };
+  const sort = (value: unknown): Sort | undefined =>
+    value === "new" || value === "price_asc" || value === "price_desc" ? value : undefined;
 
-    return {
-      q: text(raw.q),
-      category: text(raw.category),
-      brand: text(raw.brand),
-      size: text(raw.size),
-      condition: text(raw.condition),
-      city: text(raw.city),
-      min: amount(raw.min),
-      max: amount(raw.max),
-      sort: sort(raw.sort),
-    };
-  },
+  return {
+    q: text(raw["q"]),
+    category: text(raw["category"]),
+    brand: text(raw["brand"]),
+    size: text(raw["size"]),
+    condition: text(raw["condition"]),
+    city: text(raw["city"]),
+    min: amount(raw["min"]),
+    max: amount(raw["max"]),
+    sort: sort(raw["sort"]),
+  };
+}
+
+export const Route = createFileRoute("/catalog")({
+  validateSearch: parseCatalogSearch,
   head: () => ({
     meta: [
       { title: "კატალოგი · ReWear" },
@@ -78,12 +80,14 @@ export const Route = createFileRoute("/catalog")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context, search }) =>
-    Promise.all([
+  loader: ({ context, location }) => {
+    const search = parseCatalogSearch(location.search);
+    return Promise.all([
       context.queryClient.ensureQueryData(categoriesQuery),
       context.queryClient.ensureQueryData(facetsQuery),
       context.queryClient.ensureQueryData(listingsQuery(toQuery(search))),
-    ]),
+    ]);
+  },
   component: Catalog,
 });
 

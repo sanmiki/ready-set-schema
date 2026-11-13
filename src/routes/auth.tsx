@@ -32,12 +32,12 @@ const providerButtonStyle = {
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (raw): AuthSearch => ({
-    mode: raw.mode === "signup" || raw.mode === "signin" ? raw.mode : undefined,
+    mode: raw["mode"] === "signup" || raw["mode"] === "signin" ? raw["mode"] : undefined,
     redirect:
-      typeof raw.redirect === "string" &&
-      raw.redirect.startsWith("/") &&
-      !raw.redirect.startsWith("//")
-        ? raw.redirect
+      typeof raw["redirect"] === "string" &&
+      raw["redirect"].startsWith("/") &&
+      !raw["redirect"].startsWith("//")
+        ? raw["redirect"]
         : undefined,
   }),
   head: () => ({

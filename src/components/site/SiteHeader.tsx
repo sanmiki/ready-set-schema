@@ -39,7 +39,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-1 text-sm">
-          <Link to="/" className={navClass} activeProps={{ className: activeNavClass }} end>
+          <Link to="/" className={navClass} activeProps={{ className: activeNavClass }}>
             მთავარი
           </Link>
           <Link
@@ -79,7 +79,7 @@ export function SiteHeader() {
               >
                 <Avatar user={user} />
                 <span className="max-w-[10rem] truncate">
-                  {user.user_metadata?.display_name || user.email || "პროფილი"}
+                  {user.user_metadata?.["display_name"] || user.email || "პროფილი"}
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden />
               </button>
@@ -122,14 +122,21 @@ export function SiteHeader() {
 }
 
 function Avatar({ user }: { user: { user_metadata?: Record<string, unknown> } }) {
-  const src = typeof user.user_metadata?.avatar_url === "string" ? user.user_metadata.avatar_url : null;
+  const src =
+    typeof user.user_metadata?.["avatar_url"] === "string"
+      ? user.user_metadata["avatar_url"]
+      : null;
   return (
     <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-sage-soft text-xs font-medium text-sage-deep">
       {src ? (
         <img src={src} alt="" width={28} height={28} className="h-full w-full object-cover" />
       ) : (
         <span aria-hidden>
-          {String(user.user_metadata?.display_name || user.user_metadata?.email || "R").slice(0, 1).toUpperCase()}
+          {String(
+            user.user_metadata?.["display_name"] || user.user_metadata?.["email"] || "R",
+          )
+            .slice(0, 1)
+            .toUpperCase()}
         </span>
       )}
     </span>

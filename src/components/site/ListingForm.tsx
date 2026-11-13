@@ -19,6 +19,9 @@ import { firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/val
 const selectClass =
   "h-11 w-full rounded-md border border-input bg-card px-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring";
 
+// The price field is edited as text and coerced by the schema on submit.
+type FormValues = Omit<ListingFields, "price"> & { price: string };
+
 // Shared by the publish form and the edit form: fields, photos, validation and
 // the save-to-database flow.
 export function ListingForm({
@@ -34,14 +37,14 @@ export function ListingForm({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [values, setValues] = useState<ListingFields>(() => ({
+  const [values, setValues] = useState<FormValues>(() => ({
     title: listing?.title ?? "",
     description: listing?.description ?? "",
     brand: listing?.brand ?? "",
     size: listing?.size ?? "",
     color: listing?.color ?? "",
     condition: listing?.condition ?? "good",
-    price: listing ? listing.price : "",
+    price: listing ? String(listing.price) : "",
     city: listing?.city ?? "",
     categorySlug: listing?.category?.slug ?? "",
   }));
@@ -52,7 +55,7 @@ export function ListingForm({
 
   const totalPhotos = keptPhotos.length + newPhotos.length;
 
-  function setField<K extends keyof ListingFields>(key: K, value: ListingFields[K]) {
+  function setField<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
@@ -325,7 +328,7 @@ export function ListingForm({
           <select
             id="condition"
             value={values.condition}
-            onChange={(event) => setField("condition", event.target.value as ListingFields["condition"])}
+            onChange={(event) => setField("condition", event.target.value as FormValues["condition"])}
             className={`${selectClass} mt-1.5`}
           >
             {CONDITIONS.map((condition) => (
@@ -345,7 +348,7 @@ export function ListingForm({
             step={1}
             inputMode="numeric"
             value={values.price}
-            onChange={(event) => setField("price", event.target.value as ListingFields["price"])}
+            onChange={(event) => setField("price", event.target.value)}
             className="mt-1.5"
           />
         </div>
