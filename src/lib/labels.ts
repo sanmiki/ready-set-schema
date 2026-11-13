@@ -49,18 +49,37 @@ export function statusLabel(value: string | null | undefined): string {
   return STATUSES.find((s) => s.value === value)?.label ?? "";
 }
 
-const priceFormatter = new Intl.NumberFormat("ka-GE", { maximumFractionDigits: 0 });
+// Dates and prices are formatted without Intl: the browser and the server must
+// produce byte-identical text, and locale data is not available everywhere.
+const MONTHS = [
+  "იანვარი",
+  "თებერვალი",
+  "მარტი",
+  "აპრილი",
+  "მაისი",
+  "ივნისი",
+  "ივლისი",
+  "აგვისტო",
+  "სექტემბერი",
+  "ოქტომბერი",
+  "ნოემბერი",
+  "დეკემბერი",
+];
 
 // Listings are priced in georgian lari; whole lari reads best on cards.
 export function formatPrice(value: number | string | null | undefined): string {
   const n = Number(value);
   if (!Number.isFinite(n)) return "—";
-  return `${priceFormatter.format(Math.round(n))} ₾`;
+  const rounded = Math.round(n);
+  const grouped = Math.abs(rounded)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${rounded < 0 ? "-" : ""}${grouped} ₾`;
 }
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat("ka-GE", { day: "numeric", month: "long", year: "numeric" }).format(d);
+  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}, ${d.getUTCFullYear()}`;
 }

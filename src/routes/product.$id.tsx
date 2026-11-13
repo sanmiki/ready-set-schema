@@ -23,10 +23,19 @@ import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/querie
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ context, params }) =>
-    context.queryClient.ensureQueryData(listingQuery(params.id)).then((listing) => {
-      if (!listing) throw notFound();
-      return listing;
-    }),
+    context.queryClient
+      .ensureQueryData(listingQuery(params.id))
+      .then((listing) => {
+        if (!listing) throw notFound();
+        return context.queryClient.ensureQueryData(
+          relatedListingsQuery(params.id, listing.category?.slug ?? null),
+        );
+      })
+      .then(() => {
+        const listing = context.queryClient.getQueryData(listingQuery(params.id).queryKey);
+        if (!listing) throw notFound();
+        return listing;
+      }),
   head: () => ({
     meta: [
       { title: "ნივთის გვერდი · ReWear" },
@@ -59,7 +68,7 @@ function ProductPage() {
     enabled: !!user,
   });
 
-  const { data: related } = useQuery(
+  const { data: related } = useSuspenseQuery(
     relatedListingsQuery(id, listing?.category?.slug ?? null),
   );
 

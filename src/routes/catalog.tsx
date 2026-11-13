@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
 
 import { EmptyState, ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
@@ -97,12 +97,9 @@ function Catalog() {
 
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: facets } = useSuspenseQuery(facetsQuery);
-  const { data: listings, isFetching } = useQuery({
-    ...listingsQuery(toQuery(search)),
-    placeholderData: keepPreviousData,
-  });
+  const { data: listings, isFetching } = useSuspenseQuery(listingsQuery(toQuery(search)));
 
-  const items = listings ?? [];
+  const items = listings;
   const parents = categories.filter((category) => !category.parent_id);
   const hasFilters =
     !!(search.q || search.category || search.brand || search.size || search.condition || search.city || search.min !== undefined || search.max !== undefined);

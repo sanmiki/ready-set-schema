@@ -10,7 +10,17 @@ export type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 
 // Signed media URLs are short-lived on purpose: the bucket is private, so every
 // read goes through a URL the backend hands out with the listing data.
-const SIGN_TTL_SECONDS = 60 * 60;
+// The expiry is pinned to the next hour boundary (never below five minutes) so
+// the server render and the browser render of the same page hand out the *same*
+// URL — a per-request expiry would change every <img src> between the two.
+const SIGN_WINDOW_SECONDS = 60 * 60;
+
+function signWindowSeconds(): number {
+  const now = Math.floor(Date.now() / 1000);
+  const boundary =
+    Math.floor(now / SIGN_WINDOW_SECONDS) * SIGN_WINDOW_SECONDS + SIGN_WINDOW_SECONDS;
+  return Math.max(5 * 60, boundary - now);
+}
 
 export function publishableClient(): Client {
   const url = process.env["SUPABASE_URL"];
@@ -37,7 +47,9 @@ export async function signUrls(client: Client, paths: string[]): Promise<Record<
   const unique = Array.from(new Set(paths.filter((path) => path.length > 0)));
   if (unique.length === 0) return {};
 
-  const { data, error } = await client.storage.from(BUCKET).createSignedUrls(unique, SIGN_TTL_SECONDS);
+  const { data, error } = await client.storage
+    .from(BUCKET)
+    .createSignedUrls(unique, signWindowSeconds());
   const map: Record<string, string> = {};
   if (error || !data) return map;
 
