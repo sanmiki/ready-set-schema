@@ -10,12 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CatalogRouteImport } from './routes/catalog'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedMyItemsRouteImport } from './routes/_authenticated/my-items'
+import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -23,39 +38,104 @@ const CatalogRoute = CatalogRouteImport.update({
   path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedMyItemsRoute = AuthenticatedMyItemsRouteImport.update({
+  id: '/my-items',
+  path: '/my-items',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSellRoute = AuthenticatedSellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSellIdRoute = AuthenticatedSellIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedSellRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/catalog': typeof CatalogRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/my-items': typeof AuthenticatedMyItemsRoute
+  '/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
+  '/sell/$id': typeof AuthenticatedSellIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/catalog': typeof CatalogRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/my-items': typeof AuthenticatedMyItemsRoute
+  '/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
+  '/sell/$id': typeof AuthenticatedSellIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/catalog': typeof CatalogRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/my-items': typeof AuthenticatedMyItemsRoute
+  '/_authenticated/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
+  '/_authenticated/sell/$id': typeof AuthenticatedSellIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catalog' | '/product/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/catalog'
+    | '/reset-password'
+    | '/my-items'
+    | '/sell'
+    | '/product/$id'
+    | '/sell/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catalog' | '/product/$id'
-  id: '__root__' | '/' | '/catalog' | '/product/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/catalog'
+    | '/reset-password'
+    | '/my-items'
+    | '/sell'
+    | '/product/$id'
+    | '/sell/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/catalog'
+    | '/reset-password'
+    | '/_authenticated/my-items'
+    | '/_authenticated/sell'
+    | '/product/$id'
+    | '/_authenticated/sell/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CatalogRoute: typeof CatalogRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ProductIdRoute: typeof ProductIdRoute
 }
 
@@ -68,12 +148,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/catalog': {
       id: '/catalog'
       path: '/catalog'
       fullPath: '/catalog'
       preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/my-items': {
+      id: '/_authenticated/my-items'
+      path: '/my-items'
+      fullPath: '/my-items'
+      preLoaderRoute: typeof AuthenticatedMyItemsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sell': {
+      id: '/_authenticated/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof AuthenticatedSellRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/product/$id': {
       id: '/product/$id'
@@ -82,12 +197,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/sell/$id': {
+      id: '/_authenticated/sell/$id'
+      path: '/$id'
+      fullPath: '/sell/$id'
+      preLoaderRoute: typeof AuthenticatedSellIdRouteImport
+      parentRoute: typeof AuthenticatedSellRoute
+    }
   }
 }
 
+interface AuthenticatedSellRouteChildren {
+  AuthenticatedSellIdRoute: typeof AuthenticatedSellIdRoute
+}
+
+const AuthenticatedSellRouteChildren: AuthenticatedSellRouteChildren = {
+  AuthenticatedSellIdRoute: AuthenticatedSellIdRoute,
+}
+
+const AuthenticatedSellRouteWithChildren =
+  AuthenticatedSellRoute._addFileChildren(AuthenticatedSellRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMyItemsRoute: typeof AuthenticatedMyItemsRoute
+  AuthenticatedSellRoute: typeof AuthenticatedSellRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMyItemsRoute: AuthenticatedMyItemsRoute,
+  AuthenticatedSellRoute: AuthenticatedSellRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   CatalogRoute: CatalogRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ProductIdRoute: ProductIdRoute,
 }
 export const routeTree = rootRouteImport
