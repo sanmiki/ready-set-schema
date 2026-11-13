@@ -15,6 +15,13 @@
       "when": 1794611135282,
       "tag": "0001_storage_policies_for_rewear_media",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794611157740,
+      "tag": "0002_storage_read_policy_for_rewear_media",
+      "breakpoints": true
     }
   ]
 }
