@@ -18,7 +18,7 @@ import { Route as AuthenticatedMyItemsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
-import { Route as AuthenticatedSIdRouteImport } from './routes/_authenticated/s_.$id'
+import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell_.$id'
 import { Route as ApiPublicMediaRouteImport } from './routes/api/public/media'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,9 +65,9 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedSIdRoute = AuthenticatedSIdRouteImport.update({
-  id: '/s_/$id',
-  path: '/s/$id',
+const AuthenticatedSellIdRoute = AuthenticatedSellIdRouteImport.update({
+  id: '/sell_/$id',
+  path: '/sell/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicMediaRoute = ApiPublicMediaRouteImport.update({
@@ -85,7 +85,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRoute
   '/product/$id': typeof ProductIdRoute
-  '/s/$id': typeof AuthenticatedSIdRoute
+  '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
 }
 export interface FileRoutesByTo {
@@ -97,7 +97,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRoute
   '/product/$id': typeof ProductIdRoute
-  '/s/$id': typeof AuthenticatedSIdRoute
+  '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
 }
 export interface FileRoutesById {
@@ -111,7 +111,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/sell': typeof AuthenticatedSellRoute
   '/product/$id': typeof ProductIdRoute
-  '/_authenticated/s_/$id': typeof AuthenticatedSIdRoute
+  '/_authenticated/sell_/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
 }
 export interface FileRouteTypes {
@@ -125,7 +125,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/sell'
     | '/product/$id'
-    | '/s/$id'
+    | '/sell/$id'
     | '/api/public/media'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -137,7 +137,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/sell'
     | '/product/$id'
-    | '/s/$id'
+    | '/sell/$id'
     | '/api/public/media'
   id:
     | '__root__'
@@ -150,7 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/sell'
     | '/product/$id'
-    | '/_authenticated/s_/$id'
+    | '/_authenticated/sell_/$id'
     | '/api/public/media'
   fileRoutesById: FileRoutesById
 }
@@ -229,11 +229,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/s_/$id': {
-      id: '/_authenticated/s_/$id'
-      path: '/s/$id'
-      fullPath: '/s/$id'
-      preLoaderRoute: typeof AuthenticatedSIdRouteImport
+    '/_authenticated/sell_/$id': {
+      id: '/_authenticated/sell_/$id'
+      path: '/sell/$id'
+      fullPath: '/sell/$id'
+      preLoaderRoute: typeof AuthenticatedSellIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/media': {
@@ -250,14 +250,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMyItemsRoute: typeof AuthenticatedMyItemsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSellRoute: typeof AuthenticatedSellRoute
-  AuthenticatedSIdRoute: typeof AuthenticatedSIdRoute
+  AuthenticatedSellIdRoute: typeof AuthenticatedSellIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMyItemsRoute: AuthenticatedMyItemsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSellRoute: AuthenticatedSellRoute,
-  AuthenticatedSIdRoute: AuthenticatedSIdRoute,
+  AuthenticatedSellIdRoute: AuthenticatedSellIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
