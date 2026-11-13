@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedMyItemsRouteImport } from './routes/_authenticated/my-items'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell.$id'
@@ -48,6 +49,11 @@ const AuthenticatedMyItemsRoute = AuthenticatedMyItemsRouteImport.update({
   path: '/my-items',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSellRoute = AuthenticatedSellRouteImport.update({
   id: '/sell',
   path: '/sell',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/catalog': typeof CatalogRoute
   '/reset-password': typeof ResetPasswordRoute
   '/my-items': typeof AuthenticatedMyItemsRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/catalog': typeof CatalogRoute
   '/reset-password': typeof ResetPasswordRoute
   '/my-items': typeof AuthenticatedMyItemsRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/catalog': typeof CatalogRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/my-items': typeof AuthenticatedMyItemsRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/sell': typeof AuthenticatedSellRouteWithChildren
   '/product/$id': typeof ProductIdRoute
   '/_authenticated/sell/$id': typeof AuthenticatedSellIdRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/reset-password'
     | '/my-items'
+    | '/profile'
     | '/sell'
     | '/product/$id'
     | '/sell/$id'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/reset-password'
     | '/my-items'
+    | '/profile'
     | '/sell'
     | '/product/$id'
     | '/sell/$id'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/reset-password'
     | '/_authenticated/my-items'
+    | '/_authenticated/profile'
     | '/_authenticated/sell'
     | '/product/$id'
     | '/_authenticated/sell/$id'
@@ -183,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyItemsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sell': {
       id: '/_authenticated/sell'
       path: '/sell'
@@ -220,11 +239,13 @@ const AuthenticatedSellRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMyItemsRoute: typeof AuthenticatedMyItemsRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSellRoute: typeof AuthenticatedSellRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMyItemsRoute: AuthenticatedMyItemsRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSellRoute: AuthenticatedSellRouteWithChildren,
 }
 
