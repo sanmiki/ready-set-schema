@@ -123,7 +123,9 @@ function ItemRow({ listing }: { listing: Listing }) {
 
       <div className="flex flex-wrap gap-2">
         <Button asChild size="sm" variant="outline" className="rounded-full">
-          <a href={`/sell/${listing.id}`}>რედაქტირება</a>
+          <Link to="/sell/$id" params={{ id: listing.id }}>
+            რედაქტირება
+          </Link>
         </Button>
         {listing.status !== "active" && (
           <Button size="sm" variant="outline" className="rounded-full" onClick={() => void changeStatus("active")}>
