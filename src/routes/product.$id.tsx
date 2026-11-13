@@ -20,9 +20,15 @@ import { useSession } from "@/hooks/useSession";
 import { conditionLabel, formatDate, formatPrice, statusLabel } from "@/lib/labels";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
+import type { Listing } from "@/lib/types";
 
 export const Route = createFileRoute("/product/$id")({
-  head: ({ loaderData }) => ({
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(listingQuery(params.id)).then((listing) => {
+      if (!listing) throw notFound();
+      return listing;
+    }),
+  head: ({ loaderData }: { loaderData?: Listing }) => ({
     meta: [
       {
         title: loaderData ? `${loaderData.title} · ReWear` : "ნივთი · ReWear",
@@ -42,11 +48,6 @@ export const Route = createFileRoute("/product/$id")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context, params }) =>
-    context.queryClient.ensureQueryData(listingQuery(params.id)).then((listing) => {
-      if (!listing) throw notFound();
-      return listing;
-    }),
   component: ProductPage,
 });
 
