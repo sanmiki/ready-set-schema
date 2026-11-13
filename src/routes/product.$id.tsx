@@ -28,7 +28,7 @@ export const Route = createFileRoute("/product/$id")({
       if (!listing) throw notFound();
       return listing;
     }),
-  head: ({ loaderData }: { loaderData?: Listing }) => ({
+  head: ({ loaderData }: { loaderData: Listing | undefined }) => ({
     meta: [
       {
         title: loaderData ? `${loaderData.title} · ReWear` : "ნივთი · ReWear",
