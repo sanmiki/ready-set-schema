@@ -65,9 +65,23 @@ export async function signUrls(client: Client, paths: string[]): Promise<Record<
   return map;
 }
 
+// Public screens point at a same-origin endpoint instead of a signed URL: the
+// endpoint mints the short-lived URL when the browser asks for the picture, so
+// the page HTML stays byte-identical between the server render and the browser
+// render. Owner screens keep signed URLs, which also cover draft photos.
+export function mediaSrc(path: string): string {
+  return `/api/public/media?p=${encodeURIComponent(path)}`;
+}
+
+export type MediaMode = "proxy" | "signed";
+
 // Turns raw product rows into the shape every screen renders: images with a
 // viewable URL, the seller's public card, and the category name.
-export async function hydrateListings(client: Client, rows: ProductRow[]): Promise<Listing[]> {
+export async function hydrateListings(
+  client: Client,
+  rows: ProductRow[],
+  media: MediaMode = "proxy",
+): Promise<Listing[]> {
   if (rows.length === 0) return [];
 
   const productIds = rows.map((row) => row.id);
@@ -95,18 +109,18 @@ export async function hydrateListings(client: Client, rows: ProductRow[]): Promi
   const sellerRows = sellersRes.data ?? [];
   const categoryRows = categoriesRes?.data ?? [];
 
-  const urls = await signUrls(
-    client,
-    [
-      ...imageRows.map((image) => image.storage_path),
-      ...sellerRows.map((seller) => seller.avatar_url).filter((path): path is string => !!path),
-    ],
-  );
+  const mediaPaths = [
+    ...imageRows.map((image) => image.storage_path),
+    ...sellerRows.map((seller) => seller.avatar_url).filter((path): path is string => !!path),
+  ];
+  const urls = media === "signed" ? await signUrls(client, mediaPaths) : {};
+  const srcFor = (path: string) =>
+    media === "signed" ? (urls[path] ?? null) : mediaSrc(path);
 
   const imagesByProduct = new Map<string, ListingImage[]>();
   for (const image of imageRows) {
     const bucket = imagesByProduct.get(image.product_id) ?? [];
-    bucket.push({ path: image.storage_path, src: urls[image.storage_path] ?? null });
+    bucket.push({ path: image.storage_path, src: srcFor(image.storage_path) });
     imagesByProduct.set(image.product_id, bucket);
   }
 
@@ -117,7 +131,7 @@ export async function hydrateListings(client: Client, rows: ProductRow[]): Promi
       display_name: seller.display_name,
       city: seller.city,
       avatar_url: seller.avatar_url,
-      avatar_src: seller.avatar_url ? (urls[seller.avatar_url] ?? null) : null,
+      avatar_src: seller.avatar_url ? srcFor(seller.avatar_url) : null,
     });
   }
 
