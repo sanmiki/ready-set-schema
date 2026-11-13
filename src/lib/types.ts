@@ -39,16 +39,16 @@ export type Listing = {
 };
 
 export type ListingQuery = {
-  q?: string;
-  category?: string;
-  brand?: string;
-  size?: string;
-  condition?: string;
-  city?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: Sort;
-  limit?: number;
+  q?: string | undefined;
+  category?: string | undefined;
+  brand?: string | undefined;
+  size?: string | undefined;
+  condition?: string | undefined;
+  city?: string | undefined;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
+  sort?: Sort | undefined;
+  limit?: number | undefined;
 };
 
 export type Facets = {
