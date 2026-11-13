@@ -1,0 +1,55 @@
+import { queryOptions } from "@tanstack/react-query";
+
+import {
+  getListing,
+  listCategories,
+  listFacets,
+  listListings,
+  listRelatedListings,
+} from "./catalog.functions";
+import { getMyListing, getMyProfile, listMyListings } from "./seller.functions";
+import type { ListingQuery } from "./types";
+
+export const categoriesQuery = queryOptions({
+  queryKey: ["categories"],
+  queryFn: () => listCategories(),
+});
+
+export const facetsQuery = queryOptions({
+  queryKey: ["facets"],
+  queryFn: () => listFacets(),
+});
+
+export const listingsQuery = (input: ListingQuery) =>
+  queryOptions({
+    queryKey: ["listings", input],
+    queryFn: () => listListings({ data: input }),
+  });
+
+export const listingQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["listing", id],
+    queryFn: () => getListing({ data: { id } }),
+  });
+
+export const relatedListingsQuery = (id: string, categorySlug: string | null) =>
+  queryOptions({
+    queryKey: ["related-listings", id, categorySlug],
+    queryFn: () => listRelatedListings({ data: { id, categorySlug: categorySlug ?? undefined } }),
+  });
+
+export const myListingsQuery = queryOptions({
+  queryKey: ["my-listings"],
+  queryFn: () => listMyListings(),
+});
+
+export const myListingQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["my-listing", id],
+    queryFn: () => getMyListing({ data: { id } }),
+  });
+
+export const myProfileQuery = queryOptions({
+  queryKey: ["my-profile"],
+  queryFn: () => getMyProfile(),
+});
