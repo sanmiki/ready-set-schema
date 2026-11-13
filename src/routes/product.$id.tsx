@@ -20,7 +20,6 @@ import { useSession } from "@/hooks/useSession";
 import { conditionLabel, formatDate, formatPrice, statusLabel } from "@/lib/labels";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
-import type { Listing } from "@/lib/types";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ context, params }) =>
@@ -28,21 +27,18 @@ export const Route = createFileRoute("/product/$id")({
       if (!listing) throw notFound();
       return listing;
     }),
-  head: ({ loaderData }: { loaderData: Listing | undefined }) => ({
+  head: () => ({
     meta: [
-      {
-        title: loaderData ? `${loaderData.title} · ReWear` : "ნივთი · ReWear",
-      },
+      { title: "ნივთის გვერდი · ReWear" },
       {
         name: "description",
-        content: loaderData
-          ? `${loaderData.title} — ${formatPrice(loaderData.price)}. ${loaderData.description.slice(0, 120)}`
-          : "ნივთი ვერ მოიძებნა.",
+        content:
+          "ნივთის ფოტოები, ფასი, მდგომარეობა და გამყიდველი — ReWear-ზე.",
       },
-      { property: "og:title", content: loaderData ? loaderData.title : "ნივთი · ReWear" },
+      { property: "og:title", content: "ნივთის გვერდი · ReWear" },
       {
         property: "og:description",
-        content: loaderData ? `${formatPrice(loaderData.price)} · ReWear` : "ნივთი ვერ მოიძებნა.",
+        content: "იყიდე ხარისხიანი მეორადი ტანსაცმელი ნაკლებ ფასად.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
