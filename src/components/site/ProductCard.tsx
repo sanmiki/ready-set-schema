@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/labels";
 import type { Listing } from "@/lib/types";
@@ -30,6 +31,8 @@ export function ProductCard({ listing }: { listing: Listing }) {
             ფოტო არ არის
           </div>
         )}
+
+        <FavoriteButton productId={listing.id} className="absolute right-3 top-3" />
 
         {listing.status !== "active" && (
           <span className="absolute left-3 top-3 rounded-full bg-card px-3 py-1 text-xs font-medium shadow-card">
