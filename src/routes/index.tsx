@@ -7,6 +7,7 @@ import hero from "@/assets/hero.jpg";
 import catWomen from "@/assets/cat-women.jpg";
 import catMen from "@/assets/cat-men.jpg";
 import catKids from "@/assets/cat-kids.jpg";
+import catUnisex from "@/assets/cat-unisex.jpg";
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
 import { categoriesQuery, facetsQuery, listingsQuery } from "@/lib/queries";
@@ -16,6 +17,7 @@ const categoryImages: Record<string, string> = {
   women: catWomen,
   men: catMen,
   kids: catKids,
+  unisex: catUnisex,
 };
 
 export const Route = createFileRoute("/")({
