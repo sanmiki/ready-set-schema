@@ -29,6 +29,13 @@
       "when": 1794612905223,
       "tag": "0003_tighten_profile_and_media_read_rules",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794613498647,
+      "tag": "0004_create_favorites",
+      "breakpoints": true
     }
   ]
 }
