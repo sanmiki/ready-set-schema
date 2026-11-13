@@ -22,20 +22,14 @@ import { deleteListing, setListingStatus } from "@/lib/seller.functions";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/product/$id")({
-  loader: ({ context, params }) =>
-    context.queryClient
-      .ensureQueryData(listingQuery(params.id))
-      .then((listing) => {
-        if (!listing) throw notFound();
-        return context.queryClient.ensureQueryData(
-          relatedListingsQuery(params.id, listing.category?.slug ?? null),
-        );
-      })
-      .then(() => {
-        const listing = context.queryClient.getQueryData(listingQuery(params.id).queryKey);
-        if (!listing) throw notFound();
-        return listing;
-      }),
+  loader: async ({ context, params }) => {
+    const listing = await context.queryClient.ensureQueryData(listingQuery(params.id));
+    if (!listing) throw notFound();
+    await context.queryClient.ensureQueryData(
+      relatedListingsQuery(params.id, listing.category?.slug ?? null),
+    );
+    return listing;
+  },
   head: () => ({
     meta: [
       { title: "ნივთის გვერდი · ReWear" },
