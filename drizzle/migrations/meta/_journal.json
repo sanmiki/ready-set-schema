@@ -36,6 +36,13 @@
       "when": 1794613498647,
       "tag": "0004_create_favorites",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794648005677,
+      "tag": "0005_secure_realtime_messaging",
+      "breakpoints": true
     }
   ]
 }
