@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MessageCircle } from "lucide-react";
+import { useInbox } from "@/hooks/useInbox";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,8 @@ const activeNavClass = "rounded-full px-3 py-2 bg-sage-soft text-foreground";
 
 export function SiteHeader() {
   const { user } = useSession();
+  const inbox = useInbox();
+  const unread = (inbox.data ?? []).reduce((sum, row) => sum + Number(row.unread_count), 0);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -70,6 +73,12 @@ export function SiteHeader() {
           )}
         </nav>
 
+        {user && <Button asChild variant="ghost" size="icon" className="relative shrink-0" title="შეტყობინებები">
+          <Link to="/messages" search={{}} aria-label={unread ? `შეტყობინებები: ${unread} წაუკითხავი` : "შეტყობინებები"}>
+            <MessageCircle className="h-5 w-5" />
+            {unread > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">{unread > 99 ? "99+" : unread}</span>}
+          </Link>
+        </Button>}
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -92,6 +101,9 @@ export function SiteHeader() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/favorites">რჩეულები</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/messages" search={{}}>შეტყობინებები{unread > 0 ? ` (${unread})` : ""}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/my-items">ჩემი ნივთები</Link>

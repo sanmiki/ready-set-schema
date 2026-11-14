@@ -31,6 +31,9 @@ use the editor.
 
 ## Project rules
 
+- Messaging uses authenticated server functions, participant-only RLS, and narrowly granted database functions for conversation creation, safe counterpart summaries and read receipts; clients cannot mutate conversation ownership or message metadata.
+- One root-mounted messaging subscription invalidates user-keyed queries on permitted realtime changes; periodic refetch recovers missed events without duplicate per-screen subscriptions.
+
 - Public pages load photos through the same-origin `/api/public/media` route,
   which checks the listing is live and then 302s to a short-lived signed URL.
   Signed URLs embed the signing timestamp, so handing them to the browser

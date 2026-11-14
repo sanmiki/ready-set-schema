@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
+import { ContactSeller } from "@/components/site/ContactSeller";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -217,6 +218,7 @@ function ProductPage() {
               </div>
             </div>
           )}
+          {listing.status === "active" && <ContactSeller productId={listing.id} isOwner={isOwner} />}
         </div>
       </div>
 

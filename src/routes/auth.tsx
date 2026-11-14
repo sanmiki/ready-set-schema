@@ -17,7 +17,7 @@ type AuthSearch = {
 };
 
 // Only same-origin paths the app actually owns may be a sign-in destination.
-const ALLOWED_TARGETS = ["/sell", "/my-items", "/profile", "/favorites", "/catalog", "/"] as const;
+const ALLOWED_TARGETS = ["/sell", "/my-items", "/profile", "/favorites", "/messages", "/catalog", "/"] as const;
 type AllowedTarget = (typeof ALLOWED_TARGETS)[number];
 
 function allowedTarget(value: string | undefined): AllowedTarget | undefined {
@@ -72,6 +72,11 @@ function AuthPage() {
   const [forgotEmail, setForgotEmail] = useState("");
 
   function finish() {
+    const product = /^\/product\/([0-9a-f-]{36})$/i.exec(search.redirect ?? "");
+    if (product?.[1]) {
+      navigate({ to: "/product/$id", params: { id: product[1] }, replace: true });
+      return;
+    }
     const target = allowedTarget(search.redirect);
     navigate({ to: target ?? "/", replace: true });
   }
