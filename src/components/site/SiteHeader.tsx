@@ -35,13 +35,13 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="container-page flex h-16 items-center justify-between gap-4">
-        <Link to="/" className="flex items-baseline gap-2">
+      <div className="container-page flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 md:flex-nowrap md:py-0">
+        <Link to="/" className="flex shrink-0 items-baseline gap-2">
           <span className="font-serif text-2xl tracking-tight">ReWear</span>
           <span className="hidden text-xs text-muted-foreground sm:inline">მეორადი მოდა</span>
         </Link>
 
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="order-last flex w-full items-center justify-center gap-1 text-sm md:order-none md:w-auto">
           <Link to="/" className={navClass} activeProps={{ className: activeNavClass }}>
             მთავარი
           </Link>
@@ -84,10 +84,10 @@ export function SiteHeader() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 text-sm transition hover:border-sage"
+                className="flex shrink-0 items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 text-sm transition hover:border-sage"
               >
                 <Avatar user={user} />
-                <span className="max-w-[10rem] truncate">
+                <span className="hidden max-w-[10rem] truncate lg:block">
                   {user.user_metadata?.["display_name"] || user.email || "პროფილი"}
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden />
