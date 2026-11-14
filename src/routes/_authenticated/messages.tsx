@@ -13,7 +13,7 @@ import { getMessages, markRead, sendMessage } from "@/lib/messaging.functions";
 import { messageTime } from "@/lib/messaging-rules";
 
 export const Route = createFileRoute("/_authenticated/messages")({
-  validateSearch: (raw): { conversation?: string } => ({ conversation: z.string().uuid().safeParse(raw["conversation"]).success ? String(raw["conversation"]) : undefined }),
+  validateSearch: (raw): { conversation?: string | undefined } => ({ conversation: z.string().uuid().safeParse(raw["conversation"]).success ? String(raw["conversation"]) : undefined }),
   head: () => ({ meta: [
     { title: "შეტყობინებები · ReWear" },
     { name: "description", content: "პირადი მიმოწერა ReWear-ის მყიდველებსა და გამყიდველებს შორის." },
