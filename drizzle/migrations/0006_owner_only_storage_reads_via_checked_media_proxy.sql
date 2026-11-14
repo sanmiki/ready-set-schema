@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "photos of active listings are readable" ON storage.objects;
+COMMENT ON POLICY "owners read their own files" ON storage.objects IS 'Direct reads remain restricted to authenticated owner folders. Public listing photos and live seller avatars are signed only by the visibility-checked application media route.';
