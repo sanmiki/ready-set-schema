@@ -43,6 +43,13 @@
       "when": 1794648005677,
       "tag": "0005_secure_realtime_messaging",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794648797516,
+      "tag": "0006_owner_only_storage_reads_via_checked_media_proxy",
+      "breakpoints": true
     }
   ]
 }
