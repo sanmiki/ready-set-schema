@@ -27,7 +27,7 @@ export const Route = createFileRoute("/api/public/media")({
         // applies: a photo of a live listing, or an avatar a profile points at.
         const photo = await client
           .from("product_images")
-          .select("product_id, products(status)")
+          .select("product_id, products!inner(status)")
           .eq("storage_path", path)
           .eq("products.status", "active")
           .limit(1);
@@ -43,7 +43,10 @@ export const Route = createFileRoute("/api/public/media")({
           }
         }
 
-        const { data } = await client.storage
+        // Public callers cannot sign or list storage directly. Privileged
+        // signing is allowed only after the public-data check above succeeds.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data } = await supabaseAdmin.storage
           .from(BUCKET)
           .createSignedUrl(path, SIGNED_URL_SECONDS);
 

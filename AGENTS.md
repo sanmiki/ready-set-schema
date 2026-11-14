@@ -36,6 +36,7 @@ use the editor.
 
 - Public pages load photos through the same-origin `/api/public/media` route,
   which checks the listing is live and then 302s to a short-lived signed URL.
+  Storage reads are owner-only; this route verifies public visibility with a publishable client before loading the privileged signer, and product checks must use an inner join so hidden listings cannot qualify.
   Signed URLs embed the signing timestamp, so handing them to the browser
   directly makes the server and client render different strings and the page
   hydration-mismatches.
