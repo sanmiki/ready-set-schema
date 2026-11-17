@@ -29,6 +29,7 @@ export const listingFieldsSchema = z.object({
     .min(0, "ფასი უარყოფითი ვერ იქნება")
     .max(1000000, "ფასი 1 000 000 ₾-ზე მეტი ვერ იქნება"),
   city: optionalText(80, "ქალაქი 80 სიმბოლოზე მეტი ვერ იქნება"),
+  neighborhood: optionalText(80, "უბანი 80 სიმბოლოზე მეტი ვერ იქნება"),
   categorySlug: optionalText(60, "კატეგორია 60 სიმბოლოზე მეტი ვერ იქნება"),
 });
 

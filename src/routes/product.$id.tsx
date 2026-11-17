@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { ContactSeller } from "@/components/site/ContactSeller";
+import { PhoneContact } from "@/components/site/SellerContact";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -145,14 +146,18 @@ function ProductPage() {
             <Meta label="ზომა" value={listing.size} />
             <Meta label="ბრენდი" value={listing.brand} />
             <Meta label="ფერი" value={listing.color} />
-            <Meta label="ქალაქი" value={listing.city} />
+            <Meta
+              label="მდებარეობა"
+              value={[listing.city, listing.neighborhood].filter(Boolean).join(", ") || null}
+            />
             <Meta label="დამატების თარიღი" value={formatDate(listing.created_at)} />
           </dl>
 
           {listing.description && (
-            <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-              {listing.description}
-            </p>
+            <div className="mt-6">
+              <h2 className="text-xs uppercase tracking-wide text-muted-foreground">გამყიდველის აღწერა</h2>
+              <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed">{listing.description}</p>
+            </div>
           )}
 
           {listing.seller && (
@@ -218,7 +223,15 @@ function ProductPage() {
               </div>
             </div>
           )}
-          {listing.status === "active" && <ContactSeller productId={listing.id} isOwner={isOwner} />}
+          {listing.status === "active" && (
+            <section className="mt-6 rounded-2xl border border-border bg-sage-soft/40 p-4">
+              <h2 className="text-sm font-medium">გამყიდველთან დაკავშირება</h2>
+              <div className="mt-3 flex flex-wrap items-center gap-3 [&>button]:mt-0 [&>a]:mt-0">
+                <PhoneContact productId={listing.id} />
+                <ContactSeller productId={listing.id} isOwner={isOwner} />
+              </div>
+            </section>
+          )}
         </div>
       </div>
 

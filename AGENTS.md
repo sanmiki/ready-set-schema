@@ -49,3 +49,4 @@ use the editor.
   shows it.
 - Never seed demo listings or fake purchase states. The shop shows only real
   rows, and an empty shop shows a Georgian empty state.
+- Listing phone numbers live in owner-only `listing_contacts` (per-listing `is_public`), private defaults in `seller_contacts`; the public reads them only via security-definer RPCs that require opt-in and a live listing, so phones never leak through product/profile selects.

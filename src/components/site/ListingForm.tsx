@@ -12,6 +12,9 @@ import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { BUCKET, MAX_PHOTOS, productImagePath, validatePhoto } from "@/lib/media";
 import { CITIES, CONDITIONS, SIZES } from "@/lib/labels";
+import { getMyListingContact, saveListingContact } from "@/lib/contact.functions";
+import { normalizeGeorgianPhone, PHONE_ERROR } from "@/lib/phone";
+import { useQuery } from "@tanstack/react-query";
 import { createListing, deleteListing, finalizeListing, setListingImages, updateListing } from "@/lib/seller.functions";
 import type { Category, Listing } from "@/lib/types";
 import { firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
@@ -46,8 +49,18 @@ export function ListingForm({
     condition: listing?.condition ?? "good",
     price: listing ? String(listing.price) : "",
     city: listing?.city ?? "",
+    neighborhood: listing?.neighborhood ?? "",
     categorySlug: listing?.category?.slug ?? "",
   }));
+  const [phone, setPhone] = useState<string | null>(null);
+  const [phonePublic, setPhonePublic] = useState<boolean | null>(null);
+  const { data: contact } = useQuery({
+    queryKey: ["my-listing-contact", user?.id ?? null, listing?.id ?? "new"],
+    queryFn: () => getMyListingContact({ data: { productId: listing?.id } }),
+    enabled: !!user,
+  });
+  const phoneValue = phone ?? contact?.phone ?? "";
+  const phoneIsPublic = phonePublic ?? contact?.isPublic ?? false;
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +124,12 @@ export function ListingForm({
       return;
     }
 
+    if (phoneValue.trim() && !normalizeGeorgianPhone(phoneValue)) {
+      setError(PHONE_ERROR);
+      toast.error(PHONE_ERROR);
+      return;
+    }
+
     setBusy(true);
     try {
       if (mode === "create") {
@@ -131,6 +150,10 @@ export function ListingForm({
           toast.error(message);
           return;
         }
+
+        await saveListingContact({
+          data: { productId: created.id, phone: phoneValue, isPublic: phoneIsPublic },
+        });
 
         const published = await finalizeListing({
           data: { id: created.id, paths: uploaded, publish: true },
@@ -153,6 +176,15 @@ export function ListingForm({
       if (!saved.ok) {
         setError(saved.message);
         toast.error(saved.message);
+        return;
+      }
+
+      const contactSaved = await saveListingContact({
+        data: { productId: listing.id, phone: phoneValue, isPublic: phoneIsPublic },
+      });
+      if (!contactSaved.ok) {
+        setError(contactSaved.message);
+        toast.error(contactSaved.message);
         return;
       }
 
@@ -368,6 +400,52 @@ export function ListingForm({
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <Label htmlFor="neighborhood">უბანი ან მიახლოებითი მდებარეობა</Label>
+          <Input
+            id="neighborhood"
+            value={values.neighborhood ?? ""}
+            onChange={(event) => setField("neighborhood", event.target.value)}
+            placeholder="მაგ.: ვაკე"
+            className="mt-1.5"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">ზუსტ მისამართს ნუ მიუთითებთ.</p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <h2 className="text-lg">საკონტაქტო ნომერი</h2>
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          <div>
+            <Label htmlFor="phone">ტელეფონი (არასავალდებულო)</Label>
+            <Input
+              id="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phoneValue}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="555 12 34 56"
+              className="mt-1.5"
+            />
+          </div>
+          <label className="flex items-start gap-3 self-end text-sm">
+            <input
+              type="checkbox"
+              checked={phoneIsPublic}
+              disabled={!phoneValue.trim()}
+              onChange={(event) => setPhonePublic(event.target.checked)}
+              className="mt-1 h-4 w-4 accent-primary"
+            />
+            <span>
+              ნომრის ჩვენება ამ განცხადებაზე
+              <span className="block text-xs text-muted-foreground">
+                ჩართვის შემთხვევაში ნებისმიერ ვიზიტორს შეეძლება ნომრის ნახვა და დარეკვა. გამორთვა ნებისმიერ დროს შეგიძლიათ.
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 

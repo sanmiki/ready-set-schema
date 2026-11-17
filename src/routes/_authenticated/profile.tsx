@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BUCKET, avatarPath, validatePhoto } from "@/lib/media";
 import { CITIES } from "@/lib/labels";
 import { setProfileAvatar, updateMyProfile } from "@/lib/seller.functions";
+import { getMyPhone, saveMyPhone } from "@/lib/contact.functions";
 import { myProfileQuery } from "@/lib/queries";
 import type { ProfileFields } from "@/lib/validation";
 import { firstMessage, profileFieldsSchema } from "@/lib/validation";
@@ -215,6 +216,39 @@ function ProfilePage() {
           შენახვა
         </Button>
       </form>
+      <PhoneSettings />
     </div>
+  );
+}
+
+function PhoneSettings() {
+  const { user } = useSession();
+  const { data: saved } = useQuery({
+    queryKey: ["my-phone", user?.id ?? null],
+    queryFn: () => getMyPhone(),
+    enabled: !!user,
+  });
+  const [phone, setPhone] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const value = phone ?? saved ?? "";
+  return (
+    <form
+      className="mt-10 space-y-3 rounded-2xl border border-border bg-card p-5"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setBusy(true);
+        const result = await saveMyPhone({ data: { phone: value } });
+        setBusy(false);
+        if (result.ok) toast.success("ნომერი შენახულია");
+        else toast.error(result.message);
+      }}
+    >
+      <Label htmlFor="my-phone">ჩემი ტელეფონის ნომერი</Label>
+      <Input id="my-phone" type="tel" inputMode="tel" value={value} onChange={(e) => setPhone(e.target.value)} placeholder="555 12 34 56" />
+      <p className="text-xs text-muted-foreground">
+        ნომერი პირადია და არსად ჩანს. ახალ განცხადებაზე ავტომატურად ჩაიწერება — საჯაროდ მხოლოდ მაშინ გამოჩნდება, თუ განცხადებაზე „ნომრის ჩვენებას“ ჩართავთ.
+      </p>
+      <Button type="submit" variant="outline" className="rounded-full" disabled={busy}>ნომრის შენახვა</Button>
+    </form>
   );
 }
