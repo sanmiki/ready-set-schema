@@ -50,6 +50,13 @@
       "when": 1794648797516,
       "tag": "0006_owner_only_storage_reads_via_checked_media_proxy",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794918336053,
+      "tag": "0007_listing_phone_contacts",
+      "breakpoints": true
     }
   ]
 }

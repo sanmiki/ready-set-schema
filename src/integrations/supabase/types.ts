@@ -125,6 +125,35 @@ export type Database = {
           },
         ]
       }
+      listing_contacts: {
+        Row: {
+          is_public: boolean
+          phone: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          is_public?: boolean
+          phone: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          is_public?: boolean
+          phone?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_contacts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -206,6 +235,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          neighborhood: string | null
           price: number
           seller_id: string
           size: string | null
@@ -222,6 +252,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          neighborhood?: string | null
           price: number
           seller_id: string
           size?: string | null
@@ -238,6 +269,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          neighborhood?: string | null
           price?: number
           seller_id?: string
           size?: string | null
@@ -292,11 +324,42 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_contacts: {
+        Row: {
+          phone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          phone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_contacts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      listing_has_public_phone: {
+        Args: { _product_id: string }
+        Returns: boolean
+      }
+      listing_public_phone: { Args: { _product_id: string }; Returns: string }
       mark_conversation_read: {
         Args: { _conversation_id: string }
         Returns: undefined
