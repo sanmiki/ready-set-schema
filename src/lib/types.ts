@@ -30,6 +30,7 @@ export type Listing = {
   condition: Condition;
   price: number;
   city: string | null;
+  neighborhood: string | null;
   status: Status;
   created_at: string;
   updated_at: string;

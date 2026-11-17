@@ -55,6 +55,7 @@ export const createListing = createServerFn({ method: "POST" })
         condition: fields.values.condition,
         price: fields.values.price,
         city: fields.values.city || null,
+        neighborhood: fields.values.neighborhood || null,
         category_id: categoryId,
         status: "draft",
       })
@@ -119,6 +120,7 @@ export const updateListing = createServerFn({ method: "POST" })
         condition: parsed.data.condition,
         price: parsed.data.price,
         city: parsed.data.city || null,
+        neighborhood: parsed.data.neighborhood || null,
         category_id: categoryId,
       })
       .eq("id", data.id)
