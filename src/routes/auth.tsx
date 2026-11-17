@@ -17,7 +17,7 @@ type AuthSearch = {
 };
 
 // Only same-origin paths the app actually owns may be a sign-in destination.
-const ALLOWED_TARGETS = ["/sell", "/my-items", "/profile", "/favorites", "/messages", "/catalog", "/"] as const;
+const ALLOWED_TARGETS = ["/sell", "/my-items", "/profile", "/favorites", "/wallet", "/messages", "/catalog", "/"] as const;
 type AllowedTarget = (typeof ALLOWED_TARGETS)[number];
 
 function allowedTarget(value: string | undefined): AllowedTarget | undefined {

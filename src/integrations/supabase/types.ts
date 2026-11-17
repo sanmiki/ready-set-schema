@@ -157,6 +157,30 @@ export type Database = {
           },
         ]
       }
+      listing_publications: {
+        Row: {
+          amount_tetri: number
+          created_at: string
+          method: Database["public"]["Enums"]["publication_method"]
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          amount_tetri?: number
+          created_at?: string
+          method: Database["public"]["Enums"]["publication_method"]
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          amount_tetri?: number
+          created_at?: string
+          method?: Database["public"]["Enums"]["publication_method"]
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -193,6 +217,53 @@ export type Database = {
           {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_tetri: number
+          created_at: string
+          id: string
+          product_id: string | null
+          provider: string | null
+          provider_ref: string | null
+          purpose: Database["public"]["Enums"]["payment_purpose"]
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_tetri: number
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          provider?: string | null
+          provider_ref?: string | null
+          purpose: Database["public"]["Enums"]["payment_purpose"]
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_tetri?: number
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          provider?: string | null
+          provider_ref?: string | null
+          purpose?: Database["public"]["Enums"]["payment_purpose"]
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -353,11 +424,60 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount_tetri: number
+          created_at: string
+          id: string
+          idempotency_key: string
+          kind: Database["public"]["Enums"]["wallet_tx_kind"]
+          payment_id: string | null
+          product_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_tetri: number
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          kind: Database["public"]["Enums"]["wallet_tx_kind"]
+          payment_id?: string | null
+          product_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_tetri?: number
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          kind?: Database["public"]["Enums"]["wallet_tx_kind"]
+          payment_id?: string | null
+          product_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: true
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      listing_fee_quote: { Args: never; Returns: number }
       listing_has_public_phone: {
         Args: { _product_id: string }
         Returns: boolean
@@ -386,10 +506,16 @@ export type Database = {
           updated_at: string
         }[]
       }
+      publish_listing: { Args: { _product_id: string }; Returns: string }
       start_conversation: { Args: { _product_id: string }; Returns: string }
+      wallet_balance: { Args: never; Returns: number }
     }
     Enums: {
+      payment_purpose: "topup" | "listing"
+      payment_status: "pending" | "paid" | "failed" | "canceled"
       product_status: "draft" | "active" | "reserved" | "sold"
+      publication_method: "free" | "wallet" | "card" | "legacy"
+      wallet_tx_kind: "topup" | "listing_charge" | "refund"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -517,7 +643,11 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      payment_purpose: ["topup", "listing"],
+      payment_status: ["pending", "paid", "failed", "canceled"],
       product_status: ["draft", "active", "reserved", "sold"],
+      publication_method: ["free", "wallet", "card", "legacy"],
+      wallet_tx_kind: ["topup", "listing_charge", "refund"],
     },
   },
 } as const

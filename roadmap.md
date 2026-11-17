@@ -25,3 +25,5 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 
 - [x] Persistent favorites (hearts, /favorites page, owner-only access)
 - [x] Seller phone contact (opt-in per listing, reveal + call), approximate location
+- [x] Listing fee (first free, then 0.50 ₾ from balance), wallet page, ledger, publish guard
+- [ ] Card payments + balance top-ups — blocked: no bank (TBC/BoG) merchant contract/credentials yet

@@ -1,3 +1,4 @@
+import { getMyWallet } from "./wallet.functions";
 import { queryOptions } from "@tanstack/react-query";
 
 import {
@@ -59,3 +60,10 @@ export const myFavoritesQuery = queryOptions({
   queryKey: ["my-favorites"],
   queryFn: () => listMyFavorites(),
 });
+
+export const myWalletQuery = (userId: string | null) =>
+  queryOptions({
+    queryKey: ["my-wallet", userId],
+    queryFn: () => getMyWallet(),
+    enabled: !!userId,
+  });

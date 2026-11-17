@@ -17,6 +17,8 @@ import { normalizeGeorgianPhone, PHONE_ERROR } from "@/lib/phone";
 import { useQuery } from "@tanstack/react-query";
 import { createListing, deleteListing, finalizeListing, setListingImages, updateListing } from "@/lib/seller.functions";
 import type { Category, Listing } from "@/lib/types";
+import { canPayFromBalance, formatTetri } from "@/lib/pricing";
+import { myWalletQuery } from "@/lib/queries";
 import { firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 
 const selectClass =
@@ -162,8 +164,10 @@ export function ListingForm({
           data: { id: created.id, paths: uploaded, publish: true },
         });
         if (!published.ok) {
-          setError(published.message);
+          // The listing is saved as a draft; retry from "my items" instead of creating a duplicate.
           toast.error(published.message);
+          await queryClient.invalidateQueries();
+          navigate({ to: "/my-items" });
           return;
         }
 
@@ -467,6 +471,8 @@ export function ListingForm({
         </div>
       </section>
 
+      {mode === "create" && <ListingFeeNotice />}
+
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
@@ -508,4 +514,40 @@ function categoryOptions(categories: Category[]) {
       ))}
     </optgroup>
   ));
+}
+
+function ListingFeeNotice() {
+  const { user } = useSession();
+  const { data } = useQuery(myWalletQuery(user?.id ?? null));
+  if (!data) return null;
+  if (data.nextFee === 0) {
+    return (
+      <section className="rounded-2xl border border-border bg-sage-soft/40 p-4 text-sm font-medium">
+        პირველი განცხადება უფასოა
+      </section>
+    );
+  }
+  const enough = canPayFromBalance(data.balance, data.nextFee);
+  return (
+    <section className="space-y-3 rounded-2xl border border-border bg-card p-4 text-sm">
+      <p className="font-medium">განცხადების ატვირთვის საფასური: {formatTetri(data.nextFee)}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="rounded-xl border border-primary p-3">
+          <p className="font-medium">ბალანსით გადახდა</p>
+          <p className="text-xs text-muted-foreground">
+            ბალანსი: {formatTetri(data.balance)}
+            {enough ? "" : " — არასაკმარისია"}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border p-3 opacity-60" aria-disabled>
+          <p className="font-medium">ბარათით გადახდა</p>
+          <p className="text-xs text-muted-foreground">დროებით მიუწვდომელია</p>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        გადასახდელი: {formatTetri(data.nextFee)}. რედაქტირება უფასოა.
+        {enough ? "" : " ბალანსის გარეშე ნივთი მონახაზად შეინახება."}
+      </p>
+    </section>
+  );
 }

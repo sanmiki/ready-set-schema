@@ -64,6 +64,13 @@
       "when": 1794919726718,
       "tag": "0008_listing_whatsapp",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794954633960,
+      "tag": "0009_listing_fees_wallet_ledger",
+      "breakpoints": true
     }
   ]
 }

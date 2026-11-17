@@ -19,6 +19,7 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedMyItemsRouteImport } from './routes/_authenticated/my-items'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell_.$id'
 import { Route as ApiPublicMediaRouteImport } from './routes/api/public/media'
@@ -72,6 +73,11 @@ const AuthenticatedSellRoute = AuthenticatedSellRouteImport.update({
   path: '/sell',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/my-items': typeof AuthenticatedMyItemsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/product/$id': typeof ProductIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/my-items': typeof AuthenticatedMyItemsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/product/$id': typeof ProductIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/_authenticated/my-items': typeof AuthenticatedMyItemsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/sell': typeof AuthenticatedSellRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/product/$id': typeof ProductIdRoute
   '/_authenticated/sell_/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/my-items'
     | '/profile'
     | '/sell'
+    | '/wallet'
     | '/product/$id'
     | '/sell/$id'
     | '/api/public/media'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/my-items'
     | '/profile'
     | '/sell'
+    | '/wallet'
     | '/product/$id'
     | '/sell/$id'
     | '/api/public/media'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my-items'
     | '/_authenticated/profile'
     | '/_authenticated/sell'
+    | '/_authenticated/wallet'
     | '/product/$id'
     | '/_authenticated/sell_/$id'
     | '/api/public/media'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSellRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -290,6 +309,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMyItemsRoute: typeof AuthenticatedMyItemsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSellRoute: typeof AuthenticatedSellRoute
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedSellIdRoute: typeof AuthenticatedSellIdRoute
 }
 
@@ -299,6 +319,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMyItemsRoute: AuthenticatedMyItemsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSellRoute: AuthenticatedSellRoute,
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedSellIdRoute: AuthenticatedSellIdRoute,
 }
 

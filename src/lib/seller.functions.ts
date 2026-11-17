@@ -12,6 +12,8 @@ type Status = Database["public"]["Enums"]["product_status"];
 type Ok = Result;
 
 const NOT_FOUND = "ეს ნივთი ვერ მოიძებნა.";
+export const INSUFFICIENT_BALANCE =
+  "ბალანსი არასაკმარისია (საჭიროა 0.50 ₾). ნივთი შენახულია მონახაზად — გამოაქვეყნეთ „ჩემი ნივთებიდან“, როცა ბალანსი შეივსება.";
 const TRY_AGAIN = "ოპერაცია ვერ მოხერხდა. სცადეთ თავიდან.";
 
 function fieldsOrMessage(input: unknown) {
@@ -32,6 +34,15 @@ async function ownedProductId(
     .eq("seller_id", userId)
     .maybeSingle();
   return data?.id ?? null;
+}
+
+// Pricing, balance and publication are decided by the database function, never the client.
+async function publishThroughFee(client: Parameters<typeof hydrateListings>[0], id: string): Promise<Ok> {
+  const { data, error } = await client.rpc("publish_listing", { _product_id: id });
+  if (error) return { ok: false, message: TRY_AGAIN };
+  if (data === "insufficient_balance") return { ok: false, message: INSUFFICIENT_BALANCE };
+  if (data !== "published") return { ok: false, message: NOT_FOUND };
+  return { ok: true, id };
 }
 
 export const createListing = createServerFn({ method: "POST" })
@@ -87,13 +98,7 @@ export const finalizeListing = createServerFn({ method: "POST" })
       if (error) return { ok: false, message: "ფოტოების მიმაგრება ვერ მოხერხდა." };
     }
 
-    const { error } = await context.supabase
-      .from("products")
-      .update({ status: (data.publish ? "active" : "draft") as Status })
-      .eq("id", data.id)
-      .eq("seller_id", context.userId);
-
-    if (error) return { ok: false, message: TRY_AGAIN };
+    if (data.publish) return publishThroughFee(context.supabase, data.id);
     return { ok: true, id: data.id };
   });
 
@@ -175,6 +180,7 @@ export const setListingStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<Ok> => {
     const owned = await ownedProductId(context.supabase, context.userId, data.id);
     if (!owned) return { ok: false, message: NOT_FOUND };
+    if (data.status === "active") return publishThroughFee(context.supabase, data.id);
 
     const { error } = await context.supabase
       .from("products")

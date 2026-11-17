@@ -103,6 +103,9 @@ export function SiteHeader() {
                 <Link to="/favorites">რჩეულები</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link to="/wallet">ჩემი ბალანსი</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/messages" search={{}}>შეტყობინებები{unread > 0 ? ` (${unread})` : ""}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

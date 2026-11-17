@@ -50,3 +50,4 @@ use the editor.
 - Never seed demo listings or fake purchase states. The shop shows only real
   rows, and an empty shop shows a Georgian empty state.
 - Listing phone numbers live in owner-only `listing_contacts` (per-listing `is_public`), private defaults in `seller_contacts`; the public reads them only via security-definer RPCs that require opt-in and a live listing, so phones never leak through product/profile selects.
+- Listing publication goes only through the security-definer publish_listing RPC (trigger blocks non-draft status without a listing_publications row); wallet ledger is append-only integer tetri — so pricing can't be bypassed via the API.
