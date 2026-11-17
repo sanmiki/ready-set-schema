@@ -24,3 +24,4 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [ ] Google sign-in round trip in a real browser — needs a person to finish Google's account picker; the button and provider are in place.
 
 - [x] Persistent favorites (hearts, /favorites page, owner-only access)
+- [x] Seller phone contact (opt-in per listing, reveal + call), approximate location
