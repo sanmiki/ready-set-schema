@@ -1,51 +1,51 @@
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Phone } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { listingHasPublicPhone, revealListingPhone } from "@/lib/contact.functions";
+import { revealListingPhone } from "@/lib/contact.functions";
 import { formatGeorgianPhone, telHref } from "@/lib/phone";
 
-// Phone part of the seller contact box: reveal the opted-in number, then call it.
-export function PhoneContact({ productId }: { productId: string }) {
-  const { data: hasPhone } = useQuery({
-    queryKey: ["listing-has-phone", productId],
-    queryFn: () => listingHasPublicPhone({ data: { productId } }),
-  });
+// One button: reveal the opted-in number, then the same button dials it.
+export function PhoneContact({
+  productId,
+  hasPhone,
+}: {
+  productId: string;
+  hasPhone: boolean;
+}) {
   const [phone, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
   if (!hasPhone) return null;
 
-  if (!phone) {
+  if (phone) {
+    const label = `${formatGeorgianPhone(phone)} · დარეკვა`;
     return (
-      <Button
-        variant="outline"
-        className="rounded-full"
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true);
-          const number = await revealListingPhone({ data: { productId } }).catch(() => null);
-          setBusy(false);
-          if (number) setPhone(number);
-          else toast.error("ნომრის ჩვენება ვერ მოხერხდა.");
-        }}
-      >
-        <Phone className="h-4 w-4" />
-        {busy ? "იტვირთება…" : "ნომრის ჩვენება"}
+      <Button asChild size="lg" className="h-11 rounded-full px-6 shadow-card">
+        <a href={telHref(phone)}>
+          <Phone className="h-4 w-4" />
+          <span className="tabular-nums">{label}</span>
+        </a>
       </Button>
     );
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <span className="text-lg font-semibold tracking-wide">{formatGeorgianPhone(phone)}</span>
-      <Button asChild className="rounded-full">
-        <a href={telHref(phone)}>
-          <Phone className="h-4 w-4" />
-          დარეკვა
-        </a>
-      </Button>
-    </div>
+    <Button
+      size="lg"
+      className="h-11 rounded-full px-6 shadow-card"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        const number = await revealListingPhone({ data: { productId } }).catch(() => null);
+        setBusy(false);
+        if (number) setPhone(number);
+        else toast.error("ნომრის ჩვენება ვერ მოხერხდა.");
+      }}
+    >
+      <Phone className="h-4 w-4" />
+      {busy ? "იტვირთება…" : "ნომრის ჩვენება"}
+    </Button>
   );
 }

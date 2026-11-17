@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSession";
+import { listingHasPublicPhone } from "@/lib/contact.functions";
 import { conditionLabel, formatDate, formatPrice, statusLabel } from "@/lib/labels";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
@@ -63,6 +64,13 @@ function ProductPage() {
   const { data: mine } = useQuery({
     ...myListingQuery(id),
     enabled: !!user,
+  });
+
+  // The phone button appears only when the seller opted in on a live listing.
+  const { data: hasPhone } = useQuery({
+    queryKey: ["listing-has-phone", id],
+    queryFn: () => listingHasPublicPhone({ data: { productId: id } }),
+    enabled: listing?.status === "active",
   });
 
   const { data: related } = useSuspenseQuery(
@@ -226,9 +234,13 @@ function ProductPage() {
           {listing.status === "active" && (
             <section className="mt-6 rounded-2xl border border-border bg-sage-soft/40 p-4">
               <h2 className="text-sm font-medium">გამყიდველთან დაკავშირება</h2>
-              <div className="mt-3 flex flex-wrap items-center gap-3 [&>button]:mt-0 [&>a]:mt-0">
-                <PhoneContact productId={listing.id} />
-                <ContactSeller productId={listing.id} isOwner={isOwner} />
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <PhoneContact productId={listing.id} hasPhone={hasPhone === true} />
+                <ContactSeller
+                  productId={listing.id}
+                  isOwner={isOwner}
+                  variant={hasPhone ? "outline" : "default"}
+                />
               </div>
             </section>
           )}
