@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { ContactSeller } from "@/components/site/ContactSeller";
-import { PhoneContact } from "@/components/site/SellerContact";
+import { PhoneContact, WhatsAppContact } from "@/components/site/SellerContact";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSession";
-import { listingHasPublicPhone } from "@/lib/contact.functions";
+import { listingHasPublicPhone, listingWhatsapp } from "@/lib/contact.functions";
 import { conditionLabel, formatDate, formatPrice, statusLabel } from "@/lib/labels";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
@@ -67,6 +67,10 @@ function ProductPage() {
   });
 
   // The phone button appears only when the seller opted in on a live listing.
+  const { data: waPhone } = useQuery({
+    queryKey: ["listing-whatsapp", id],
+    queryFn: () => listingWhatsapp({ data: { productId: id } }),
+  });
   const { data: hasPhone } = useQuery({
     queryKey: ["listing-has-phone", id],
     queryFn: () => listingHasPublicPhone({ data: { productId: id } }),
@@ -236,6 +240,7 @@ function ProductPage() {
               <h2 className="text-sm font-medium">გამყიდველთან დაკავშირება</h2>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <PhoneContact productId={listing.id} hasPhone={hasPhone === true} />
+                <WhatsAppContact productId={listing.id} title={listing.title} phone={waPhone} />
                 <ContactSeller
                   productId={listing.id}
                   isOwner={isOwner}

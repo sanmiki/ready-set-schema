@@ -54,6 +54,7 @@ export function ListingForm({
   }));
   const [phone, setPhone] = useState<string | null>(null);
   const [phonePublic, setPhonePublic] = useState<boolean | null>(null);
+  const [whatsapp, setWhatsapp] = useState<boolean | null>(null);
   const { data: contact } = useQuery({
     queryKey: ["my-listing-contact", user?.id ?? null, listing?.id ?? "new"],
     queryFn: () => getMyListingContact({ data: { productId: listing?.id } }),
@@ -61,6 +62,8 @@ export function ListingForm({
   });
   const phoneValue = phone ?? contact?.phone ?? "";
   const phoneIsPublic = phonePublic ?? contact?.isPublic ?? false;
+  const phoneValid = !!normalizeGeorgianPhone(phoneValue);
+  const whatsappOn = phoneValid && phoneIsPublic && (whatsapp ?? contact?.whatsapp ?? false);
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +155,7 @@ export function ListingForm({
         }
 
         await saveListingContact({
-          data: { productId: created.id, phone: phoneValue, isPublic: phoneIsPublic },
+          data: { productId: created.id, phone: phoneValue, isPublic: phoneIsPublic, whatsapp: whatsappOn },
         });
 
         const published = await finalizeListing({
@@ -180,7 +183,7 @@ export function ListingForm({
       }
 
       const contactSaved = await saveListingContact({
-        data: { productId: listing.id, phone: phoneValue, isPublic: phoneIsPublic },
+        data: { productId: listing.id, phone: phoneValue, isPublic: phoneIsPublic, whatsapp: whatsappOn },
       });
       if (!contactSaved.ok) {
         setError(contactSaved.message);
@@ -443,6 +446,21 @@ export function ListingForm({
               ნომრის ჩვენება ამ განცხადებაზე
               <span className="block text-xs text-muted-foreground">
                 ჩართვის შემთხვევაში ნებისმიერ ვიზიტორს შეეძლება ნომრის ნახვა და დარეკვა. გამორთვა ნებისმიერ დროს შეგიძლიათ.
+              </span>
+            </span>
+          </label>
+          <label className="flex items-start gap-3 text-sm md:col-start-2">
+            <input
+              type="checkbox"
+              checked={whatsappOn}
+              disabled={!phoneValid || !phoneIsPublic}
+              onChange={(event) => setWhatsapp(event.target.checked)}
+              className="mt-1 h-4 w-4 accent-primary"
+            />
+            <span>
+              ამ ნომერზე WhatsApp-იც მაქვს
+              <span className="block text-xs text-muted-foreground">
+                ხელმისაწვდომია მხოლოდ მაშინ, როცა ნომრის ჩვენება ჩართულია.
               </span>
             </span>
           </label>

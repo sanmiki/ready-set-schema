@@ -55,6 +55,8 @@
   --color-ring-offset-background: var(--background);
   --color-sage: var(--sage);
   --color-sage-soft: var(--sage-soft);
+  --color-whatsapp: #25d366;
+  --color-whatsapp-foreground: #ffffff;
   --color-sage-deep: var(--sage-deep);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);

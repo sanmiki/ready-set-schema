@@ -131,18 +131,21 @@ export type Database = {
           phone: string
           product_id: string
           updated_at: string
+          whatsapp_enabled: boolean
         }
         Insert: {
           is_public?: boolean
           phone: string
           product_id: string
           updated_at?: string
+          whatsapp_enabled?: boolean
         }
         Update: {
           is_public?: boolean
           phone?: string
           product_id?: string
           updated_at?: string
+          whatsapp_enabled?: boolean
         }
         Relationships: [
           {
@@ -360,6 +363,10 @@ export type Database = {
         Returns: boolean
       }
       listing_public_phone: { Args: { _product_id: string }; Returns: string }
+      listing_public_whatsapp: {
+        Args: { _product_id: string }
+        Returns: string
+      }
       mark_conversation_read: {
         Args: { _conversation_id: string }
         Returns: undefined

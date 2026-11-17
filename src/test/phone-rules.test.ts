@@ -17,3 +17,14 @@ describe("Georgian phone numbers", () => {
     expect(formatGeorgianPhone("+995555123456")).toBe("+995 555 12 34 56");
   });
 });
+
+import { whatsappHref } from "@/lib/phone";
+describe("whatsapp link", () => {
+  it("uses digits-only number and encoded message with title and url", () => {
+    const href = whatsappHref("+995555123456", "ქურთუკი", "https://x.ge/product/1");
+    expect(href.startsWith("https://wa.me/995555123456?text=")).toBe(true);
+    expect(decodeURIComponent(href.split("text=")[1] ?? "")).toBe(
+      "გამარჯობა, ReWear-ზე თქვენი განცხადება ვნახე და მაინტერესებს ეს ნივთი: ქურთუკი https://x.ge/product/1",
+    );
+  });
+});

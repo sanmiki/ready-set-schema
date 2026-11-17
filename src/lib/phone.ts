@@ -20,3 +20,10 @@ export function telHref(e164: string): string {
 }
 
 export const PHONE_ERROR = "ტელეფონის ნომერი არასწორია. მაგ.: 555 12 34 56";
+
+// wa.me wants digits only, e.g. 995555123456.
+export function whatsappHref(e164: string, title: string, url: string): string {
+  const digits = e164.replace(/\D/g, "");
+  const text = `გამარჯობა, ReWear-ზე თქვენი განცხადება ვნახე და მაინტერესებს ეს ნივთი: ${title} ${url}`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
