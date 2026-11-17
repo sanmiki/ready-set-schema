@@ -437,7 +437,7 @@ export function ListingForm({
               checked={phoneIsPublic}
               disabled={!phoneValue.trim()}
               onChange={(event) => setPhonePublic(event.target.checked)}
-              className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]"
+              className="mt-1 h-4 w-4 accent-primary"
             />
             <span>
               ნომრის ჩვენება ამ განცხადებაზე
