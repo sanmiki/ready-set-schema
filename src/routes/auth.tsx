@@ -42,14 +42,14 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "შესვლა · ReWear" },
+      { title: "შესვლა · მეორადი" },
       {
         name: "description",
-        content: "შედით ReWear-ზე, რომ ნივთები გამოაქვეყნოთ ან პროფილი შეავსოთ.",
+        content: "შედით მეორადზე, რომ ნივთები გამოაქვეყნოთ ან პროფილი შეავსოთ.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "შესვლა · ReWear" },
-      { property: "og:description", content: "ReWear — მეორადი მოდა საქართველოში." },
+      { property: "og:title", content: "შესვლა · მეორადი" },
+      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -10,10 +10,10 @@ import { myFavoritesQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/favorites")({
   head: () => ({
     meta: [
-      { title: "რჩეულები · ReWear" },
-      { name: "description", content: "თქვენ მიერ შენახული მეორადი ნივთები ReWear-ზე." },
+      { title: "რჩეულები · მეორადი" },
+      { name: "description", content: "თქვენ მიერ შენახული მეორადი ნივთები მეორადზე." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "რჩეულები · ReWear" },
+      { property: "og:title", content: "რჩეულები · მეორადი" },
       { property: "og:description", content: "შენახული ნივთები ერთ ადგილას." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

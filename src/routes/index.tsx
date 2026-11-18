@@ -23,13 +23,13 @@ const categoryImages: Record<string, string> = {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ReWear — იყიდე და გაყიდე მეორადი მოდა" },
+      { title: "მეორადი — იყიდე და გაყიდე მეორადი ტანსაცმელი" },
       {
         name: "description",
         content:
-          "ReWear — თანამედროვე მარკეტი მეორადი ტანსაცმლისთვის საქართველოში. ფასები ლარში.",
+          "მეორადი — თანამედროვე მარკეტი მეორადი ტანსაცმლისთვის საქართველოში. ფასები ლარში.",
       },
-      { property: "og:title", content: "ReWear — მეორადი მოდა საქართველოში" },
+      { property: "og:title", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
       {
         property: "og:description",
         content: "აღმოაჩინე ხარისხიანი მეორადი ტანსაცმელი ან გაყიდე შენი.",

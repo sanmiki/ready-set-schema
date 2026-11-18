@@ -23,11 +23,11 @@ import type { Listing } from "@/lib/types";
 export const Route = createFileRoute("/_authenticated/my-items")({
   head: () => ({
     meta: [
-      { title: "ჩემი ნივთები · ReWear" },
+      { title: "ჩემი ნივთები · მეორადი" },
       { name: "description", content: "მართეთ გამოქვეყნებული ნივთები: ფასი, მდგომარეობა და სტატუსი." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "ჩემი ნივთები · ReWear" },
-      { property: "og:description", content: "ReWear — მეორადი მოდა საქართველოში." },
+      { property: "og:title", content: "ჩემი ნივთები · მეორადი" },
+      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

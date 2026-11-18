@@ -20,11 +20,11 @@ import { firstMessage, profileFieldsSchema } from "@/lib/validation";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "პროფილი · ReWear" },
-      { name: "description", content: "შეავსეთ სახელი, ქალაქი და ცნობადი ReWear-ის პროფილზე." },
+      { title: "პროფილი · მეორადი" },
+      { name: "description", content: "შეავსეთ სახელი, ქალაქი და ცნობადი მეორადის პროფილზე." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "პროფილი · ReWear" },
-      { property: "og:description", content: "ReWear — მეორადი მოდა საქართველოში." },
+      { property: "og:title", content: "პროფილი · მეორადი" },
+      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

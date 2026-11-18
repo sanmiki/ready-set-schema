@@ -66,12 +66,12 @@ export const Route = createFileRoute("/catalog")({
   validateSearch: parseCatalogSearch,
   head: () => ({
     meta: [
-      { title: "კატალოგი · ReWear" },
+      { title: "კატალოგი · მეორადი" },
       {
         name: "description",
-        content: "მეორადი ტანსაცმლის კატალოგი ReWear-ზე: ქალები, კაცები, უნისექსი და ბავშვები.",
+        content: "მეორადი ტანსაცმლის კატალოგი მეორადზე: ქალები, კაცები, უნისექსი და ბავშვები.",
       },
-      { property: "og:title", content: "კატალოგი · ReWear" },
+      { property: "og:title", content: "კატალოგი · მეორადი" },
       {
         property: "og:description",
         content: "იპოვე მეორადი ტანსაცმელი კატეგორიის, ზომის, მდგომარეობისა და ფასის მიხედვით.",

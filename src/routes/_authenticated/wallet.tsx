@@ -10,11 +10,11 @@ import { myWalletQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({
     meta: [
-      { title: "ჩემი ბალანსი · ReWear" },
-      { name: "description", content: "ReWear-ის ბალანსი, შევსება და ტრანზაქციების ისტორია." },
+      { title: "ჩემი ბალანსი · მეორადი" },
+      { name: "description", content: "მეორადის ბალანსი, შევსება და ტრანზაქციების ისტორია." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "ჩემი ბალანსი · ReWear" },
-      { property: "og:description", content: "განცხადების საფასურის გადახდა ReWear-ის ბალანსით." },
+      { property: "og:title", content: "ჩემი ბალანსი · მეორადი" },
+      { property: "og:description", content: "განცხადების საფასურის გადახდა მეორადის ბალანსით." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -68,7 +68,7 @@ function WalletPage() {
         </p>
         <div className="mt-4 space-y-1 text-xs text-muted-foreground">
           <p className="font-medium text-foreground">პირობები</p>
-          <p>ბალანსი არის ReWear-ის კრედიტი, რომელიც გამოიყენება მხოლოდ განცხადების საფასურისთვის.</p>
+          <p>ბალანსი არის მეორადის კრედიტი, რომელიც გამოიყენება მხოლოდ განცხადების საფასურისთვის.</p>
           <p>თანხის განაღდება ან სხვა მომხმარებლისთვის გადაცემა შეუძლებელია.</p>
           <p>გამოუყენებელი თანხის დაბრუნება შესაძლებელია მოთხოვნით, გადახდის პროვაიდერის წესების შესაბამისად.</p>
           <p>გამოქვეყნებული განცხადების საფასური არ ბრუნდება წაშლის, დაჯავშნის ან გაყიდვის შემთხვევაში.</p>

@@ -83,18 +83,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ReWear — მეორადი მოდა საქართველოში" },
+      { title: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
       {
         name: "description",
-        content: "ReWear — მეორადი ტანსაცმლის მარკეტი საქართველოში. იყიდე ნაკლებ ფასად ან გაყიდე ის, რასაც აღარ ატარებ.",
+        content: "მეორადი — მეორადი ტანსაცმლის მარკეტი საქართველოში. იყიდე ნაკლებ ფასად ან გაყიდე ის, რასაც აღარ ატარებ.",
       },
-      { name: "author", content: "ReWear" },
-      { property: "og:title", content: "ReWear — მეორადი მოდა საქართველოში" },
+      { name: "author", content: "MEORADI" },
+      { property: "og:title", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
       {
         property: "og:description",
         content: "იყიდე ხარისხიანი მეორადი ტანსაცმელი ან გაყიდე შენი. ფასები ლარში.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "მეორადი" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -102,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

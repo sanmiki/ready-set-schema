@@ -36,13 +36,13 @@ export const Route = createFileRoute("/product/$id")({
   },
   head: () => ({
     meta: [
-      { title: "ნივთის გვერდი · ReWear" },
+      { title: "ნივთის გვერდი · მეორადი" },
       {
         name: "description",
         content:
-          "ნივთის ფოტოები, ფასი, მდგომარეობა და გამყიდველი — ReWear-ზე.",
+          "ნივთის ფოტოები, ფასი, მდგომარეობა და გამყიდველი — მეორადზე.",
       },
-      { property: "og:title", content: "ნივთის გვერდი · ReWear" },
+      { property: "og:title", content: "ნივთის გვერდი · მეორადი" },
       {
         property: "og:description",
         content: "იყიდე ხარისხიანი მეორადი ტანსაცმელი ნაკლებ ფასად.",

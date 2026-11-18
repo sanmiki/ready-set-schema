@@ -1,4 +1,4 @@
-# ReWear — marketplace build roadmap
+# მეორადი (MEORADI, formerly ReWear) — marketplace build roadmap
 
 Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_pasted.md`
 (plus the uploaded home page `user-uploads://index.tsx`, which is the design to preserve).

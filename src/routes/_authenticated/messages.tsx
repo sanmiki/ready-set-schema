@@ -15,10 +15,10 @@ import { messageTime } from "@/lib/messaging-rules";
 export const Route = createFileRoute("/_authenticated/messages")({
   validateSearch: (raw): { conversation?: string | undefined } => ({ conversation: z.string().uuid().safeParse(raw["conversation"]).success ? String(raw["conversation"]) : undefined }),
   head: () => ({ meta: [
-    { title: "შეტყობინებები · ReWear" },
-    { name: "description", content: "პირადი მიმოწერა ReWear-ის მყიდველებსა და გამყიდველებს შორის." },
-    { property: "og:title", content: "შეტყობინებები · ReWear" },
-    { property: "og:description", content: "თქვენი პირადი მიმოწერა ReWear-ზე." },
+    { title: "შეტყობინებები · მეორადი" },
+    { name: "description", content: "პირადი მიმოწერა მეორადის მყიდველებსა და გამყიდველებს შორის." },
+    { property: "og:title", content: "შეტყობინებები · მეორადი" },
+    { property: "og:description", content: "თქვენი პირადი მიმოწერა მეორადზე." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" },
   ] }),
   component: MessagesPage,
