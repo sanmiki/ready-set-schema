@@ -83,19 +83,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
+      { title: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
       {
         name: "description",
-        content: "მეორადი — მეორადი ტანსაცმლის მარკეტი საქართველოში. იყიდე ნაკლებ ფასად ან გაყიდე ის, რასაც აღარ ატარებ.",
+        content: "MEORADI — მეორადი ტანსაცმლის მარკეტი საქართველოში. იყიდე ნაკლებ ფასად ან გაყიდე ის, რასაც აღარ ატარებ.",
       },
       { name: "author", content: "MEORADI" },
-      { property: "og:title", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
+      { property: "og:title", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
       {
         property: "og:description",
         content: "იყიდე ხარისხიანი მეორადი ტანსაცმელი ან გაყიდე შენი. ფასები ლარში.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "მეორადი" },
+      { property: "og:site_name", content: "MEORADI" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

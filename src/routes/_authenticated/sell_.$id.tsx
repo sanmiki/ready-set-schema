@@ -7,11 +7,11 @@ import { categoriesQuery, myListingQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/sell_/$id")({
   head: () => ({
     meta: [
-      { title: "ნივთის რედაქტირება · მეორადი" },
+      { title: "ნივთის რედაქტირება · MEORADI" },
       { name: "description", content: "შეცვალეთ ნივთის ფოტოები, ფასი ან აღწერა." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "ნივთის რედაქტირება · მეორადი" },
-      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
+      { property: "og:title", content: "ნივთის რედაქტირება · MEORADI" },
+      { property: "og:description", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

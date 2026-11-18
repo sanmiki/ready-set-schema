@@ -24,7 +24,7 @@ describe("whatsapp link", () => {
     const href = whatsappHref("+995555123456", "ქურთუკი", "https://x.ge/product/1");
     expect(href.startsWith("https://wa.me/995555123456?text=")).toBe(true);
     expect(decodeURIComponent(href.split("text=")[1] ?? "")).toBe(
-      "გამარჯობა, მეორადზე თქვენი განცხადება ვნახე და მაინტერესებს ეს ნივთი: ქურთუკი https://x.ge/product/1",
+      "გამარჯობა, MEORADI-ზე თქვენი განცხადება ვნახე და მაინტერესებს ეს ნივთი: ქურთუკი https://x.ge/product/1",
     );
   });
 });

@@ -36,13 +36,13 @@ export const Route = createFileRoute("/product/$id")({
   },
   head: () => ({
     meta: [
-      { title: "ნივთის გვერდი · მეორადი" },
+      { title: "ნივთის გვერდი · MEORADI" },
       {
         name: "description",
         content:
-          "ნივთის ფოტოები, ფასი, მდგომარეობა და გამყიდველი — მეორადზე.",
+          "ნივთის ფოტოები, ფასი, მდგომარეობა და გამყიდველი — MEORADI-ზე.",
       },
-      { property: "og:title", content: "ნივთის გვერდი · მეორადი" },
+      { property: "og:title", content: "ნივთის გვერდი · MEORADI" },
       {
         property: "og:description",
         content: "იყიდე ხარისხიანი მეორადი ტანსაცმელი ნაკლებ ფასად.",

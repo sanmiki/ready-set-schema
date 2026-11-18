@@ -7,11 +7,11 @@ import { categoriesQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/sell")({
   head: () => ({
     meta: [
-      { title: "ახალი ნივთი · მეორადი" },
+      { title: "ახალი ნივთი · MEORADI" },
       { name: "description", content: "ატვირთეთ ფოტოები, მიუთითეთ ფასი და გამოაქვეყნეთ ნივთი." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "ახალი ნივთი · მეორადი" },
-      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
+      { property: "og:title", content: "ახალი ნივთი · MEORADI" },
+      { property: "og:description", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -23,13 +23,13 @@ const categoryImages: Record<string, string> = {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "მეორადი — იყიდე და გაყიდე მეორადი ტანსაცმელი" },
+      { title: "MEORADI — იყიდე და გაყიდე მეორადი ტანსაცმელი" },
       {
         name: "description",
         content:
-          "მეორადი — თანამედროვე მარკეტი მეორადი ტანსაცმლისთვის საქართველოში. ფასები ლარში.",
+          "MEORADI — თანამედროვე მარკეტი მეორადი ტანსაცმლისთვის საქართველოში. ფასები ლარში.",
       },
-      { property: "og:title", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
+      { property: "og:title", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ" },
       {
         property: "og:description",
         content: "აღმოაჩინე ხარისხიანი მეორადი ტანსაცმელი ან გაყიდე შენი.",

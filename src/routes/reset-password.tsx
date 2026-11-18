@@ -11,11 +11,11 @@ import { firstMessage, newPasswordSchema } from "@/lib/validation";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "პაროლის აღდგენა · მეორადი" },
-      { name: "description", content: "დააყენეთ ახალი პაროლი მეორადის ანგარიშისთვის." },
+      { title: "პაროლის აღდგენა · MEORADI" },
+      { name: "description", content: "დააყენეთ ახალი პაროლი MEORADI-ის ანგარიშისთვის." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "პაროლის აღდგენა · მეორადი" },
-      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
+      { property: "og:title", content: "პაროლის აღდგენა · MEORADI" },
+      { property: "og:description", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

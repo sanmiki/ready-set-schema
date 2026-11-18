@@ -5,7 +5,7 @@ export function SiteFooter() {
     <footer className="mt-20 border-t border-border bg-card">
       <div className="container-page flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="font-sans text-xl font-semibold tracking-tight">მეორადი<span className="text-primary">.</span></p>
+          <p className="font-sans text-xl font-semibold tracking-tight">MEORADI<span className="text-primary">.</span></p>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
             მეორადი ტანსაცმლის მარკეტი საქართველოში: იყიდე ნაკლებ ფასად ან გაყიდე ის, რასაც აღარ ატარებ.
           </p>
@@ -19,7 +19,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border">
         <div className="container-page py-4 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} მეორადი (MEORADI) · ფასები ლარში (₾)
+          © {new Date().getFullYear()} MEORADI · ფასები ლარში (₾)
         </div>
       </div>
     </footer>

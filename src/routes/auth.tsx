@@ -42,14 +42,14 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "შესვლა · მეორადი" },
+      { title: "შესვლა · MEORADI" },
       {
         name: "description",
-        content: "შედით მეორადზე, რომ ნივთები გამოაქვეყნოთ ან პროფილი შეავსოთ.",
+        content: "შედით MEORADI-ზე, რომ ნივთები გამოაქვეყნოთ ან პროფილი შეავსოთ.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "შესვლა · მეორადი" },
-      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
+      { property: "og:title", content: "შესვლა · MEORADI" },
+      { property: "og:description", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

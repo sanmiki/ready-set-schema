@@ -20,11 +20,11 @@ import { firstMessage, profileFieldsSchema } from "@/lib/validation";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "პროფილი · მეორადი" },
-      { name: "description", content: "შეავსეთ სახელი, ქალაქი და ცნობადი მეორადის პროფილზე." },
+      { title: "პროფილი · MEORADI" },
+      { name: "description", content: "შეავსეთ სახელი, ქალაქი და ცნობადი MEORADI-ის პროფილზე." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "პროფილი · მეორადი" },
-      { property: "og:description", content: "მეორადი — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
+      { property: "og:title", content: "პროფილი · MEORADI" },
+      { property: "og:description", content: "MEORADI — კარგ ნივთებს მეორე სიცოცხლე აქვთ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

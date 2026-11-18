@@ -24,6 +24,6 @@ export const PHONE_ERROR = "ტელეფონის ნომერი ა�
 // wa.me wants digits only, e.g. 995555123456.
 export function whatsappHref(e164: string, title: string, url: string): string {
   const digits = e164.replace(/\D/g, "");
-  const text = `გამარჯობა, მეორადზე თქვენი განცხადება ვნახე და მაინტერესებს ეს ნივთი: ${title} ${url}`;
+  const text = `გამარჯობა, MEORADI-ზე თქვენი განცხადება ვნახე და მაინტერესებს ეს ნივთი: ${title} ${url}`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }

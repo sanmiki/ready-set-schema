@@ -37,7 +37,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="container-page flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 md:flex-nowrap md:py-0">
         <Link to="/" className="flex shrink-0 items-baseline gap-2">
-          <span className="font-sans text-2xl font-semibold tracking-tight">მეორადი<span className="text-primary">.</span></span>
+          <span className="font-sans text-2xl font-semibold tracking-tight">MEORADI<span className="text-primary">.</span></span>
           <span className="hidden text-xs text-muted-foreground sm:inline">კარგ ნივთებს მეორე სიცოცხლე აქვთ</span>
         </Link>
 

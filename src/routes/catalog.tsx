@@ -66,12 +66,12 @@ export const Route = createFileRoute("/catalog")({
   validateSearch: parseCatalogSearch,
   head: () => ({
     meta: [
-      { title: "კატალოგი · მეორადი" },
+      { title: "კატალოგი · MEORADI" },
       {
         name: "description",
-        content: "მეორადი ტანსაცმლის კატალოგი მეორადზე: ქალები, კაცები, უნისექსი და ბავშვები.",
+        content: "მეორადი ტანსაცმლის კატალოგი MEORADI-ზე: ქალები, კაცები, უნისექსი და ბავშვები.",
       },
-      { property: "og:title", content: "კატალოგი · მეორადი" },
+      { property: "og:title", content: "კატალოგი · MEORADI" },
       {
         property: "og:description",
         content: "იპოვე მეორადი ტანსაცმელი კატეგორიის, ზომის, მდგომარეობისა და ფასის მიხედვით.",
