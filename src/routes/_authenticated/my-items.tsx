@@ -95,7 +95,7 @@ function ItemRow({ listing }: { listing: Listing }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-card p-3">
+    <div className="flex flex-wrap items-center gap-4 surface p-3">
       <div className="h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
         {listing.images[0]?.src && (
           <img

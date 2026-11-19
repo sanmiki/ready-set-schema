@@ -109,18 +109,18 @@ function ProductPage() {
 
   return (
     <div className="container-page py-8">
-      <div className="grid gap-10 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14">
         <div>
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-muted">
             {cover?.src ? (
-              <img src={cover.src} alt={listing.title} width={800} height={1000} className="h-full w-full object-cover" />
+              <img src={cover.src} alt={listing.title} width={800} height={1000} className="h-full w-full object-cover transition-transform duration-300 ease-out hover:scale-[1.02]" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
                 ფოტო არ არის
               </div>
             )}
             {listing.status !== "active" && (
-              <span className="absolute left-4 top-4 rounded-full bg-card px-4 py-1.5 text-sm shadow-card">
+              <span className="absolute left-4 top-4 rounded-full bg-card/95 px-3 py-1 text-xs font-medium backdrop-blur">
                 {statusLabel(listing.status)}
               </span>
             )}
@@ -133,12 +133,12 @@ function ProductPage() {
                   key={image.path}
                   type="button"
                   onClick={() => setActiveImage(index)}
-                  className={`h-20 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-muted transition ${
+                  className={`h-20 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-muted transition-[border-color,opacity] duration-200 ${
                     index === activeImage ? "border-sage" : "border-transparent"
                   }`}
                   aria-label={`ფოტო ${index + 1}`}
                 >
-                  {image.src && <img src={image.src} alt="" width={64} height={80} className="h-full w-full object-cover" />}
+                  {image.src && <img src={image.src} alt="" width={64} height={80} className="h-full w-full object-cover transition-transform duration-300 ease-out hover:scale-[1.02]" />}
                 </button>
               ))}
             </div>
@@ -151,9 +151,9 @@ function ProductPage() {
             <h1 className="text-3xl md:text-4xl">{listing.title}</h1>
             <FavoriteButton productId={listing.id} className="h-11 w-11 shrink-0 border border-border" />
           </div>
-          <p className="mt-3 text-2xl font-semibold">{formatPrice(listing.price)}</p>
+          <p className="mt-4 text-3xl font-semibold tracking-tight">{formatPrice(listing.price)}</p>
 
-          <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-border py-5 text-sm">
             <Meta label="მდგომარეობა" value={conditionLabel(listing.condition)} />
             <Meta label="ზომა" value={listing.size} />
             <Meta label="ბრენდი" value={listing.brand} />
@@ -173,10 +173,10 @@ function ProductPage() {
           )}
 
           {listing.seller && (
-            <div className="mt-8 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+            <div className="mt-6 flex items-center gap-3 surface p-4">
               <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-sage-soft text-sm font-medium text-sage-deep">
                 {listing.seller.avatar_src ? (
-                  <img src={listing.seller.avatar_src} alt="" width={44} height={44} className="h-full w-full object-cover" />
+                  <img src={listing.seller.avatar_src} alt="" width={44} height={44} className="h-full w-full object-cover transition-transform duration-300 ease-out hover:scale-[1.02]" />
                 ) : (
                   listing.seller.username.slice(0, 1).toUpperCase()
                 )}
@@ -236,7 +236,7 @@ function ProductPage() {
             </div>
           )}
           {listing.status === "active" && (
-            <section className="mt-6 rounded-2xl border border-border bg-sage-soft/40 p-4">
+            <section className="mt-6 surface p-5">
               <h2 className="text-sm font-medium">გამყიდველთან დაკავშირება</h2>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <PhoneContact productId={listing.id} hasPhone={hasPhone === true} />

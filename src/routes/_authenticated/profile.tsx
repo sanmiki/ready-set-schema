@@ -233,7 +233,7 @@ function PhoneSettings() {
   const value = phone ?? saved ?? "";
   return (
     <form
-      className="mt-10 space-y-3 rounded-2xl border border-border bg-card p-5"
+      className="mt-10 space-y-3 surface p-5"
       onSubmit={async (event) => {
         event.preventDefault();
         setBusy(true);

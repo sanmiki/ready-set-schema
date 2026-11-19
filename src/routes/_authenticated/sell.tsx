@@ -24,8 +24,8 @@ function SellPage() {
   const { data: categories } = useSuspenseQuery(categoriesQuery);
 
   return (
-    <div className="container-page py-10">
-      <h1 className="text-3xl">ახალი ნივთის დამატება</h1>
+    <div className="container-page py-8 md:py-12">
+      <h1 className="text-3xl tracking-tight md:text-4xl">ახალი ნივთის დამატება</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         ფოტოები, ფასი და მდგომარეობა — ნივთი გამოქვეყნების შემდეგ კატალოგში გამოჩნდება.
       </p>

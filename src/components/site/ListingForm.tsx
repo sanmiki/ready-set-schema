@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Loader2, X } from "lucide-react";
+import { conditionLabel, formatPrice } from "@/lib/labels";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,26 @@ import { myWalletQuery } from "@/lib/queries";
 import { firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 
 const selectClass =
-  "h-11 w-full rounded-md border border-input bg-card px-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring";
+  "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/20";
+const fieldClass = "mt-1.5 h-11 rounded-xl transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-ring/20";
+
+const SECTIONS = [
+  { id: "photos", label: "ფოტოები" },
+  { id: "basics", label: "ძირითადი ინფორმაცია" },
+  { id: "details", label: "კატეგორია და მდგომარეობა" },
+  { id: "price", label: "ფასი და მდებარეობა" },
+  { id: "contact", label: "საკონტაქტო" },
+] as const;
+
+function Section({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="surface scroll-mt-28 p-5 sm:p-7">
+      <h2 className="font-sans text-base font-semibold tracking-tight">{title}</h2>
+      {hint && <p className="mt-1 text-sm text-muted-foreground">{hint}</p>}
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
 
 // The price field is edited as text and coerced by the schema on submit.
 type FormValues = Omit<ListingFields, "price"> & { price: string };
@@ -72,6 +92,21 @@ export function ListingForm({
   const [busy, setBusy] = useState(false);
 
   const totalPhotos = keptPhotos.length + newPhotos.length;
+  const firstNew = newPhotos[0];
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  useEffect(() => {
+    if (keptPhotos[0]?.src) {
+      setPreviewSrc(keptPhotos[0].src);
+      return;
+    }
+    if (!firstNew) {
+      setPreviewSrc(null);
+      return;
+    }
+    const url = URL.createObjectURL(firstNew);
+    setPreviewSrc(url);
+    return () => URL.revokeObjectURL(url);
+  }, [keptPhotos, firstNew]);
 
   function setField<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -223,14 +258,25 @@ export function ListingForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-      <section>
-        <h2 className="text-xl">ფოტოები</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          მაქსიმუმ {MAX_PHOTOS} ფოტო, თითო 10 მბ-მდე. პირველი ფოტო ბარათზე გამოჩნდება.
-        </p>
+    <form onSubmit={handleSubmit} noValidate className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[200px_minmax(0,1fr)_300px] xl:gap-8">
+      <nav aria-label="ფორმის ნაწილები" className="hidden xl:block">
+        <ol className="sticky top-24 space-y-0.5 border-l border-border text-sm">
+          {SECTIONS.map((section) => (
+            <li key={section.id}>
+              <a
+                href={`#${section.id}`}
+                className="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+              >
+                {section.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
 
-        <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+      <div className="min-w-0 space-y-5">
+      <Section id="photos" title="ფოტოები" hint={`მაქსიმუმ ${MAX_PHOTOS} ფოტო, თითო 10 მბ-მდე. პირველი ფოტო ბარათზე გამოჩნდება.`}>
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
           {keptPhotos.map((image) => (
             <div key={image.path} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
               {image.src && (
@@ -268,9 +314,10 @@ export function ListingForm({
           ))}
 
           {totalPhotos < MAX_PHOTOS && (
-            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border text-xs text-muted-foreground transition hover:border-sage hover:bg-sage-soft">
+            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-input bg-background text-xs text-muted-foreground transition-colors hover:border-primary hover:bg-sage-soft hover:text-foreground focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
               <ImagePlus className="h-5 w-5" aria-hidden />
-              <span>აირჩიე</span>
+              <span>ფოტოს დამატება</span>
+              <span className="text-[11px]">{totalPhotos}/{MAX_PHOTOS}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -284,9 +331,10 @@ export function ListingForm({
             </label>
           )}
         </div>
-      </section>
+      </Section>
 
-      <section className="grid gap-5 md:grid-cols-2">
+      <Section id="basics" title="ძირითადი ინფორმაცია">
+      <div className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
           <Label htmlFor="title">სათაური</Label>
           <Input
@@ -294,7 +342,7 @@ export function ListingForm({
             value={values.title}
             onChange={(event) => setField("title", event.target.value)}
             placeholder="მაგ. ჯინსის ქურთუკი Levi's"
-            className="mt-1.5"
+            className={fieldClass}
           />
         </div>
 
@@ -306,10 +354,14 @@ export function ListingForm({
             onChange={(event) => setField("description", event.target.value)}
             rows={5}
             placeholder="მდგომარეობა, ნაკლოვანებები, ზომის თავისებურებები…"
-            className="mt-1.5"
+            className="mt-1.5 rounded-xl transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-ring/20"
           />
         </div>
+      </div>
+      </Section>
 
+      <Section id="details" title="კატეგორია და მდგომარეობა">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="category">კატეგორია</Label>
           <select
@@ -330,7 +382,7 @@ export function ListingForm({
             value={values.brand ?? ""}
             onChange={(event) => setField("brand", event.target.value)}
             placeholder="მაგ. Zara"
-            className="mt-1.5"
+            className={fieldClass}
           />
         </div>
 
@@ -358,7 +410,7 @@ export function ListingForm({
             value={values.color ?? ""}
             onChange={(event) => setField("color", event.target.value)}
             placeholder="მაგ. ლურჯი"
-            className="mt-1.5"
+            className={fieldClass}
           />
         </div>
 
@@ -378,7 +430,12 @@ export function ListingForm({
           </select>
         </div>
 
-        <div>
+      </div>
+      </Section>
+
+      <Section id="price" title="ფასი და მდებარეობა">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="sm:col-span-2">
           <Label htmlFor="price">ფასი (₾)</Label>
           <Input
             id="price"
@@ -388,7 +445,7 @@ export function ListingForm({
             inputMode="numeric"
             value={values.price}
             onChange={(event) => setField("price", event.target.value)}
-            className="mt-1.5"
+            className={fieldClass}
           />
         </div>
 
@@ -416,15 +473,15 @@ export function ListingForm({
             value={values.neighborhood ?? ""}
             onChange={(event) => setField("neighborhood", event.target.value)}
             placeholder="მაგ.: ვაკე"
-            className="mt-1.5"
+            className={fieldClass}
           />
           <p className="mt-1 text-xs text-muted-foreground">ზუსტ მისამართს ნუ მიუთითებთ.</p>
         </div>
-      </section>
+      </div>
+      </Section>
 
-      <section className="rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-lg">საკონტაქტო ნომერი</h2>
-        <div className="mt-3 grid gap-4 md:grid-cols-2">
+      <Section id="contact" title="საკონტაქტო ნომერი" hint="არასავალდებულო — მყიდველები ყოველთვის შეძლებენ მოგწერონ შიდა ჩატით.">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="phone">ტელეფონი (არასავალდებულო)</Label>
             <Input
@@ -435,7 +492,7 @@ export function ListingForm({
               value={phoneValue}
               onChange={(event) => setPhone(event.target.value)}
               placeholder="555 12 34 56"
-              className="mt-1.5"
+              className={fieldClass}
             />
           </div>
           <label className="flex items-start gap-3 self-end text-sm">
@@ -469,7 +526,7 @@ export function ListingForm({
             </span>
           </label>
         </div>
-      </section>
+      </Section>
 
       {mode === "create" && <ListingFeeNotice />}
 
@@ -479,8 +536,8 @@ export function ListingForm({
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" size="lg" className="rounded-full px-8" disabled={busy}>
+      <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-border bg-background/90 px-4 py-3 backdrop-blur-md sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+        <Button type="submit" size="lg" className="h-12 flex-1 rounded-full px-8 sm:flex-none" disabled={busy}>
           {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}
           {mode === "create" ? "გამოქვეყნება" : "ცვლილებების შენახვა"}
         </Button>
@@ -495,6 +552,30 @@ export function ListingForm({
           გაუქმება
         </Button>
       </div>
+      </div>
+
+      <aside className="hidden lg:block">
+        <div className="sticky top-24">
+          <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">გადახედვა</p>
+          <div className="surface overflow-hidden p-3">
+            <div className="aspect-[4/5] overflow-hidden rounded-xl bg-muted">
+              {previewSrc ? (
+                <img src={previewSrc} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-xs text-muted-foreground">ფოტო არ არის</div>
+              )}
+            </div>
+            <div className="px-1 pb-1 pt-3">
+              <p className="font-semibold">{values.price ? formatPrice(values.price) : "— ₾"}</p>
+              <p className="mt-0.5 line-clamp-1 text-sm">{values.title || "ნივთის სათაური"}</p>
+              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                {[conditionLabel(values.condition), values.city].filter(Boolean).join(" · ")}
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">ასე გამოჩნდება ნივთი კატალოგში.</p>
+        </div>
+      </aside>
     </form>
   );
 }
@@ -522,7 +603,7 @@ function ListingFeeNotice() {
   if (!data) return null;
   if (data.nextFee === 0) {
     return (
-      <section className="rounded-2xl border border-border bg-sage-soft/40 p-4 text-sm font-medium">
+      <section className="rounded-2xl bg-sage-soft px-5 py-4 text-sm font-medium text-sage-deep">
         პირველი განცხადება უფასოა
       </section>
     );

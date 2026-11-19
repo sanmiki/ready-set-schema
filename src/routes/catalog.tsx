@@ -127,7 +127,7 @@ function Catalog() {
         )}
       </div>
 
-      <div className="mt-6 grid gap-4 rounded-3xl border border-border bg-card p-4 md:grid-cols-12">
+      <div className="mt-6 grid gap-4 surface p-4 md:grid-cols-12">
         <form
           className="md:col-span-5"
           onSubmit={(event) => {

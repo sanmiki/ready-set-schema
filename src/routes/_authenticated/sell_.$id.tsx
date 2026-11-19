@@ -35,8 +35,8 @@ function EditListingPage() {
   if (!listing) return null;
 
   return (
-    <div className="container-page py-10">
-      <h1 className="text-3xl">ნივთის რედაქტირება</h1>
+    <div className="container-page py-8 md:py-12">
+      <h1 className="text-3xl tracking-tight md:text-4xl">ნივთის რედაქტირება</h1>
       <p className="mt-1 text-sm text-muted-foreground">{listing.title}</p>
       <div className="mt-8">
         <ListingForm mode="edit" listing={listing} categories={categories} />

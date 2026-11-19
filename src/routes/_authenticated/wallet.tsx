@@ -32,7 +32,7 @@ function WalletPage() {
     <div className="container-page max-w-3xl py-10">
       <h1 className="text-3xl">ჩემი ბალანსი</h1>
 
-      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      <section className="mt-6 surface p-6">
         <div className="flex items-center gap-3 text-muted-foreground">
           <Wallet className="h-5 w-5" aria-hidden />
           <span className="text-sm">ხელმისაწვდომი ბალანსი</span>
@@ -54,7 +54,7 @@ function WalletPage() {
         )}
       </section>
 
-      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      <section className="mt-6 surface p-6">
         <h2 className="text-lg font-medium">ბალანსის შევსება</h2>
         <div className="mt-4 grid grid-cols-3 gap-3">
           {TOPUP_CHOICES_TETRI.map((amount) => (
@@ -80,7 +80,7 @@ function WalletPage() {
         {data && data.transactions.length === 0 && (
           <p className="mt-3 text-sm text-muted-foreground">ტრანზაქციები ჯერ არ არის.</p>
         )}
-        <ul className="mt-3 divide-y divide-border rounded-2xl border border-border bg-card">
+        <ul className="mt-3 divide-y divide-border surface">
           {data?.transactions.map((tx) => (
             <li key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
               <span>
