@@ -27,11 +27,11 @@ const selectClass =
 const fieldClass = "mt-1.5 h-11 rounded-xl transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-ring/20";
 
 const SECTIONS = [
-  { id: "photos", label: "ფოტოები" },
-  { id: "basics", label: "ძირითადი ინფორმაცია" },
-  { id: "details", label: "კატეგორია და მდგომარეობა" },
-  { id: "price", label: "ფასი და მდებარეობა" },
-  { id: "contact", label: "საკონტაქტო" },
+  { id: "sec-photos", label: "ფოტოები" },
+  { id: "sec-basics", label: "ძირითადი ინფორმაცია" },
+  { id: "sec-details", label: "კატეგორია და მდგომარეობა" },
+  { id: "sec-price", label: "ფასი და მდებარეობა" },
+  { id: "sec-contact", label: "საკონტაქტო" },
 ] as const;
 
 function Section({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
@@ -275,7 +275,7 @@ export function ListingForm({
       </nav>
 
       <div className="min-w-0 space-y-5">
-      <Section id="photos" title="ფოტოები" hint={`მაქსიმუმ ${MAX_PHOTOS} ფოტო, თითო 10 მბ-მდე. პირველი ფოტო ბარათზე გამოჩნდება.`}>
+      <Section id="sec-photos" title="ფოტოები" hint={`მაქსიმუმ ${MAX_PHOTOS} ფოტო, თითო 10 მბ-მდე. პირველი ფოტო ბარათზე გამოჩნდება.`}>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
           {keptPhotos.map((image) => (
             <div key={image.path} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
@@ -333,7 +333,7 @@ export function ListingForm({
         </div>
       </Section>
 
-      <Section id="basics" title="ძირითადი ინფორმაცია">
+      <Section id="sec-basics" title="ძირითადი ინფორმაცია">
       <div className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
           <Label htmlFor="title">სათაური</Label>
@@ -360,7 +360,7 @@ export function ListingForm({
       </div>
       </Section>
 
-      <Section id="details" title="კატეგორია და მდგომარეობა">
+      <Section id="sec-details" title="კატეგორია და მდგომარეობა">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="category">კატეგორია</Label>
@@ -433,7 +433,7 @@ export function ListingForm({
       </div>
       </Section>
 
-      <Section id="price" title="ფასი და მდებარეობა">
+      <Section id="sec-price" title="ფასი და მდებარეობა">
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Label htmlFor="price">ფასი (₾)</Label>
@@ -480,7 +480,7 @@ export function ListingForm({
       </div>
       </Section>
 
-      <Section id="contact" title="საკონტაქტო ნომერი" hint="არასავალდებულო — მყიდველები ყოველთვის შეძლებენ მოგწერონ შიდა ჩატით.">
+      <Section id="sec-contact" title="საკონტაქტო ნომერი" hint="არასავალდებულო — მყიდველები ყოველთვის შეძლებენ მოგწერონ შიდა ჩატით.">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="phone">ტელეფონი (არასავალდებულო)</Label>
