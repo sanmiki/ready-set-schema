@@ -57,6 +57,8 @@
   --color-sage-soft: var(--sage-soft);
   --color-whatsapp: #25d366;
   --color-whatsapp-foreground: #ffffff;
+  --color-studio: #d4c7bd;
+  --color-studio-foreground: oklch(0.22 0.01 60);
   --color-sage-deep: var(--sage-deep);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
