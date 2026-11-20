@@ -213,3 +213,53 @@
     letter-spacing: -0.015em;
   }
 }
+
+/* Shared motion tokens — match the category picker (200ms, cubic-bezier(0.2,0,0,1)). */
+:root {
+  --motion-fast: 140ms;
+  --motion-base: 200ms;
+  --motion-slow: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Restrained spring: quick response, ~1.5% overshoot, gentle settle. */
+  --ease-spring: linear(0, 0.22 8%, 0.55 18%, 0.82 30%, 0.96 42%, 1.015 55%, 1.01 68%, 1);
+}
+
+/* Unlayered so it extends (not fights) per-element transition utilities. */
+:where(button, [role="button"], [role="tab"], [role="option"], [role="menuitem"], [role="checkbox"], [role="radio"], [role="combobox"], summary, input[type="checkbox"], input[type="radio"], select) {
+  transition-property: color, background-color, border-color, outline-color, box-shadow, opacity, scale, transform, translate;
+  transition-duration: var(--motion-base);
+  transition-timing-function: var(--ease-spring);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, [role="button"], [role="tab"], [role="combobox"], summary):not(:disabled):not([aria-disabled="true"]):active {
+  scale: 0.975;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--ease-standard);
+}
+
+:where(input[type="checkbox"], input[type="radio"], [role="checkbox"], [role="radio"]):not(:disabled):active {
+  scale: 0.92;
+  transition-duration: var(--motion-fast);
+}
+
+/* Floating menus, popovers, selects and dialogs share the picker's entrance. */
+:where([data-radix-popper-content-wrapper] > *, [role="dialog"], [role="alertdialog"])[data-state] {
+  animation-duration: var(--motion-slow);
+  animation-timing-function: var(--ease-spring);
+}
+:where([data-radix-popper-content-wrapper] > *, [role="dialog"], [role="alertdialog"])[data-state="closed"] {
+  animation-duration: var(--motion-fast);
+  animation-timing-function: var(--ease-standard);
+}
+
+/* Product/category cards: subtle lift only, never layout. */
+:where(a:has(> img), a:has(img)):not([role="button"]) {
+  transition: translate var(--motion-slow) var(--ease-standard), box-shadow var(--motion-slow) var(--ease-standard), opacity var(--motion-base) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(button, [role="button"], [role="tab"], [role="combobox"], summary, input, [role="checkbox"], [role="radio"]):active {
+    scale: none !important;
+  }
+}
