@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BUCKET, MAX_PHOTOS, productImagePath, validatePhoto } from "@/lib/media";
 import { CITIES, CONDITIONS, SIZES } from "@/lib/labels";
 import { getMyListingContact, saveListingContact } from "@/lib/contact.functions";
-import { normalizeGeorgianPhone, PHONE_ERROR } from "@/lib/phone";
+import { contactPhoneError, normalizeGeorgianPhone } from "@/lib/phone";
 import { useQuery } from "@tanstack/react-query";
 import { createListing, deleteListing, finalizeListing, setListingImages, updateListing } from "@/lib/seller.functions";
 import type { Category, Listing } from "@/lib/types";
@@ -89,6 +89,7 @@ export function ListingForm({
     audience: listing?.audience ?? "",
   }));
   const [phone, setPhone] = useState<string | null>(null);
+  const [phoneAttempted, setPhoneAttempted] = useState(false);
   const [phonePublic, setPhonePublic] = useState<boolean | null>(null);
   const [whatsapp, setWhatsapp] = useState<boolean | null>(null);
   const { data: contact } = useQuery({
@@ -99,6 +100,9 @@ export function ListingForm({
   const phoneValue = phone ?? contact?.phone ?? "";
   const phoneIsPublic = phonePublic ?? contact?.isPublic ?? false;
   const phoneValid = !!normalizeGeorgianPhone(phoneValue);
+  const publishing = mode === "create" || listing?.status === "active";
+  const phoneError = contactPhoneError(phoneValue, publishing);
+  const visiblePhoneError = phoneAttempted ? phoneError : null;
   const whatsappOn = phoneValid && phoneIsPublic && (whatsapp ?? contact?.whatsapp ?? false);
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
@@ -168,6 +172,7 @@ export function ListingForm({
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    setPhoneAttempted(true);
 
     const parsed = listingFieldsSchema.safeParse(values);
     if (!parsed.success) {
@@ -200,9 +205,11 @@ export function ListingForm({
       return;
     }
 
-    if (phoneValue.trim() && !normalizeGeorgianPhone(phoneValue)) {
-      setError(PHONE_ERROR);
-      toast.error(PHONE_ERROR);
+    if (phoneError) {
+      setError(phoneError);
+      toast.error(phoneError);
+      document.getElementById("phone")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      document.getElementById("phone")?.focus({ preventScroll: true });
       return;
     }
 
@@ -227,9 +234,15 @@ export function ListingForm({
           return;
         }
 
-        await saveListingContact({
+        const contactSaved = await saveListingContact({
           data: { productId: created.id, phone: phoneValue, isPublic: phoneIsPublic, whatsapp: whatsappOn },
         });
+        if (!contactSaved.ok) {
+          toast.error(contactSaved.message);
+          await queryClient.invalidateQueries();
+          navigate({ to: "/my-items" });
+          return;
+        }
 
         const published = await finalizeListing({
           data: { id: created.id, paths: uploaded, publish: true, promo },
@@ -551,20 +564,28 @@ export function ListingForm({
       </div>
       </Section>
 
-      <Section id="sec-contact" title="საკონტაქტო ნომერი" hint="არასავალდებულო — მყიდველები ყოველთვის შეძლებენ მოგწერონ შიდა ჩატით.">
+      <Section id="sec-contact" title="საკონტაქტო ნომერი" hint="გამოქვეყნებისთვის აუცილებელია. მყიდველები შეძლებენ მოგწერონ შიდა ჩატითაც.">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <Label htmlFor="phone">ტელეფონი (არასავალდებულო)</Label>
+            <Label htmlFor="phone">საკონტაქტო ნომერი{publishing && <span className="text-destructive"> *</span>}</Label>
             <Input
               id="phone"
               type="tel"
               inputMode="tel"
               autoComplete="tel"
+              required={publishing}
+              aria-required={publishing}
+              aria-invalid={visiblePhoneError ? true : undefined}
+              aria-describedby={visiblePhoneError ? "phone-error" : undefined}
               value={phoneValue}
               onChange={(event) => setPhone(event.target.value)}
+              onBlur={() => {
+                if (publishing || phoneValue.trim()) setPhoneAttempted(true);
+              }}
               placeholder="555 12 34 56"
-              className={fieldClass}
+              className={cn(fieldClass, visiblePhoneError && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20")}
             />
+            {visiblePhoneError && <p id="phone-error" role="alert" className="mt-1.5 text-xs text-destructive">{visiblePhoneError}</p>}
           </div>
           <label className="flex items-start gap-3 self-end text-sm">
             <input

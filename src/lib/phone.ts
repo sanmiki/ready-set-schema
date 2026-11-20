@@ -19,7 +19,14 @@ export function telHref(e164: string): string {
   return `tel:${e164}`;
 }
 
-export const PHONE_ERROR = "ტელეფონის ნომერი არასწორია. მაგ.: 555 12 34 56";
+export const PHONE_REQUIRED = "მიუთითე საკონტაქტო ნომერი";
+export const PHONE_ERROR = "შეიყვანე სწორი ტელეფონის ნომერი";
+
+// Drafts may omit a number; publishing always requires a valid Georgian one.
+export function contactPhoneError(input: string, publishing: boolean): string | null {
+  if (!input.trim()) return publishing ? PHONE_REQUIRED : null;
+  return normalizeGeorgianPhone(input) ? null : PHONE_ERROR;
+}
 
 // wa.me wants digits only, e.g. 995555123456.
 export function whatsappHref(e164: string, title: string, url: string): string {

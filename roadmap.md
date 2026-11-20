@@ -19,6 +19,7 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [x] Browser verification: register → publish with photos → catalog → product → edit price → profile save → reserve → publish again → sign out.
 
 ## Open
+- [x] Require a valid Georgian contact phone when publishing; allow phone-free drafts and prefill from the seller profile without overwriting it.
 - [x] Secure persistent messaging, product contact button, realtime inbox and unread navigation indicators.
 - [x] Verified two-party realtime messaging, refresh persistence, read receipts, uniqueness, self-message protection, third-party privacy and mobile layout; manual testing steps provided.
 - [ ] Google sign-in round trip in a real browser — needs a person to finish Google's account picker; the button and provider are in place.

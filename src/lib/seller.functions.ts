@@ -8,6 +8,7 @@ import { hydrateListings, resolveCategoryId, signUrls } from "./db";
 import { BUCKET, MAX_PHOTOS } from "./media";
 import type { Listing, Profile, Result } from "./types";
 import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema, profileFieldsSchema } from "./validation";
+import { PHONE_ERROR, PHONE_REQUIRED } from "./phone";
 
 type Status = Database["public"]["Enums"]["product_status"];
 type Ok = Result;
@@ -41,6 +42,8 @@ async function ownedProductId(
 async function publishThroughFee(client: Parameters<typeof hydrateListings>[0], id: string): Promise<Ok> {
   const { data, error } = await client.rpc("publish_listing", { _product_id: id });
   if (error) return { ok: false, message: TRY_AGAIN };
+  if (data === "phone_required") return { ok: false, message: PHONE_REQUIRED };
+  if (data === "phone_invalid") return { ok: false, message: PHONE_ERROR };
   if (data === "insufficient_balance") return { ok: false, message: INSUFFICIENT_BALANCE };
   if (data !== "published") return { ok: false, message: NOT_FOUND };
   return { ok: true, id };
