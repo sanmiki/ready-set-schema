@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type WalletTx = {
   id: string;
-  kind: "topup" | "listing_charge" | "refund";
+  kind: "topup" | "listing_charge" | "promotion_charge" | "refund";
   amount_tetri: number;
   created_at: string;
 };

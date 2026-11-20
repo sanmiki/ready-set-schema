@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/wallet")({
   component: WalletPage,
 });
 
-const KIND_LABEL = { topup: "ბალანსის შევსება", listing_charge: "განცხადების საფასური", refund: "დაბრუნება" } as const;
+const KIND_LABEL = { topup: "ბალანსის შევსება", listing_charge: "განცხადების საფასური", promotion_charge: "პრომო სერვისი", refund: "დაბრუნება" } as const;
 
 function WalletPage() {
   const { user } = useSession();

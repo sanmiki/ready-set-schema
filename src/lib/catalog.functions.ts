@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import { hydrateListings, publishableClient, resolveCategoryId } from "./db";
+import { hydrateListings, publishableClient, resolveCategoryId, type Client } from "./db";
 import type { Category, Facets, Listing, ListingQuery } from "./types";
 
 const DEFAULT_LIMIT = 48;
@@ -12,6 +12,38 @@ function searchPattern(value: string | undefined): string {
   if (!value) return "";
   const cleaned = value.replace(/[%,()*]/g, " ").replace(/\s+/g, " ").trim();
   return cleaned.length > 0 ? `%${cleaned}%` : "";
+}
+
+type PromoState = { tier: number; highlighted: boolean; rankAt: number };
+
+async function promoMap(client: Client): Promise<Map<string, PromoState>> {
+  const { data } = await client.rpc("promoted_listings");
+  return new Map(
+    (data ?? []).map((row) => [
+      row.product_id,
+      { tier: row.tier_rank, highlighted: row.highlighted, rankAt: Date.parse(row.rank_at) },
+    ]),
+  );
+}
+
+function applyPromo(listings: Listing[], promos: Map<string, PromoState>): Listing[] {
+  return listings.map((listing) => {
+    const promo = promos.get(listing.id);
+    return { ...listing, promoTier: promo?.tier ?? 0, highlighted: promo?.highlighted ?? false };
+  });
+}
+
+// Promoted tiers first, then the bump/publication time, then id so ties never shuffle.
+function promoOrder(promos: Map<string, PromoState>) {
+  return (a: Listing, b: Listing) => {
+    const pa = promos.get(a.id);
+    const pb = promos.get(b.id);
+    const tier = (pb?.tier ?? 0) - (pa?.tier ?? 0);
+    if (tier !== 0) return tier;
+    const time = (pb?.rankAt ?? Date.parse(b.created_at)) - (pa?.rankAt ?? Date.parse(a.created_at));
+    if (time !== 0) return time;
+    return a.id < b.id ? -1 : 1;
+  };
 }
 
 export const listCategories = createServerFn({ method: "GET" }).handler(async (): Promise<Category[]> => {
@@ -67,6 +99,9 @@ export const listListings = createServerFn({ method: "GET" })
       categoryIds = Array.from(wanted);
     }
 
+    const promos = await promoMap(client);
+    const usePromoOrder = !data.sort || data.sort === "new";
+    const build = () => {
     let query = client.from("products").select("*").eq("status", "active");
 
     if (categoryIds) query = query.in("category_id", categoryIds);
@@ -82,14 +117,30 @@ export const listListings = createServerFn({ method: "GET" })
       query = query.or(`title.ilike.${pattern},brand.ilike.${pattern},description.ilike.${pattern}`);
     }
 
+    return query;
+    };
+
+    const limit = Math.min(Math.max(data.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
+    let query = build();
     if (data.sort === "price_asc") query = query.order("price", { ascending: true });
     else if (data.sort === "price_desc") query = query.order("price", { ascending: false });
     else query = query.order("created_at", { ascending: false });
-
-    const limit = Math.min(Math.max(data.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
     const { data: rows } = await query.limit(limit);
+    let all = rows ?? [];
 
-    return hydrateListings(client, rows ?? []);
+    // Promoted or bumped listings that match the filters but fall outside the newest page.
+    if (usePromoOrder && promos.size > 0) {
+      const seen = new Set(all.map((row) => row.id));
+      const missing = [...promos.keys()].filter((id) => !seen.has(id));
+      if (missing.length > 0) {
+        const { data: extra } = await build().in("id", missing);
+        all = [...all, ...(extra ?? [])];
+      }
+    }
+
+    let listings = applyPromo(await hydrateListings(client, all), promos);
+    if (usePromoOrder) listings = listings.sort(promoOrder(promos)).slice(0, limit);
+    return listings;
   });
 
 export const getListing = createServerFn({ method: "GET" })
@@ -122,4 +173,17 @@ export const listRelatedListings = createServerFn({ method: "GET" })
 
     const { data: rows } = await query.order("created_at", { ascending: false }).limit(4);
     return hydrateListings(client, rows ?? []);
+  });
+
+// Dedicated promoted section: SUPER VIP only, live listings only, never padded.
+export const listPromotedListings = createServerFn({ method: "GET" })
+  .inputValidator((input: { minTier: number; limit?: number }) => input)
+  .handler(async ({ data }): Promise<Listing[]> => {
+    const client = publishableClient();
+    const promos = await promoMap(client);
+    const ids = [...promos.entries()].filter(([, p]) => p.tier >= data.minTier).map(([id]) => id);
+    if (ids.length === 0) return [];
+    const { data: rows } = await client.from("products").select("*").eq("status", "active").in("id", ids);
+    const listings = applyPromo(await hydrateListings(client, rows ?? []), promos);
+    return listings.sort(promoOrder(promos)).slice(0, Math.min(data.limit ?? 8, 24));
   });

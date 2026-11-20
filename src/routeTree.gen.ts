@@ -21,6 +21,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as AuthenticatedPromoteIdRouteImport } from './routes/_authenticated/promote.$id'
 import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell_.$id'
 import { Route as ApiPublicMediaRouteImport } from './routes/api/public/media'
 
@@ -83,6 +84,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPromoteIdRoute = AuthenticatedPromoteIdRouteImport.update({
+  id: '/promote/$id',
+  path: '/promote/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSellIdRoute = AuthenticatedSellIdRouteImport.update({
   id: '/sell_/$id',
   path: '/sell/$id',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/sell': typeof AuthenticatedSellRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/product/$id': typeof ProductIdRoute
+  '/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
 }
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/sell': typeof AuthenticatedSellRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/product/$id': typeof ProductIdRoute
+  '/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
 }
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_authenticated/sell': typeof AuthenticatedSellRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/product/$id': typeof ProductIdRoute
+  '/_authenticated/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/_authenticated/sell_/$id': typeof AuthenticatedSellIdRoute
   '/api/public/media': typeof ApiPublicMediaRoute
 }
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/wallet'
     | '/product/$id'
+    | '/promote/$id'
     | '/sell/$id'
     | '/api/public/media'
   fileRoutesByTo: FileRoutesByTo
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/wallet'
     | '/product/$id'
+    | '/promote/$id'
     | '/sell/$id'
     | '/api/public/media'
   id:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sell'
     | '/_authenticated/wallet'
     | '/product/$id'
+    | '/_authenticated/promote/$id'
     | '/_authenticated/sell_/$id'
     | '/api/public/media'
   fileRoutesById: FileRoutesById
@@ -286,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/promote/$id': {
+      id: '/_authenticated/promote/$id'
+      path: '/promote/$id'
+      fullPath: '/promote/$id'
+      preLoaderRoute: typeof AuthenticatedPromoteIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sell_/$id': {
       id: '/_authenticated/sell_/$id'
       path: '/sell/$id'
@@ -310,6 +329,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSellRoute: typeof AuthenticatedSellRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
+  AuthenticatedPromoteIdRoute: typeof AuthenticatedPromoteIdRoute
   AuthenticatedSellIdRoute: typeof AuthenticatedSellIdRoute
 }
 
@@ -320,6 +340,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSellRoute: AuthenticatedSellRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
+  AuthenticatedPromoteIdRoute: AuthenticatedPromoteIdRoute,
   AuthenticatedSellIdRoute: AuthenticatedSellIdRoute,
 }
 

@@ -9,7 +9,7 @@ import catKids from "@/assets/cat-kids.jpg";
 import catUnisex from "@/assets/cat-unisex.jpg";
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
-import { categoriesQuery, facetsQuery, listingsQuery } from "@/lib/queries";
+import { categoriesQuery, facetsQuery, listingsQuery, promotedListingsQuery } from "@/lib/queries";
 import type { Category, Listing } from "@/lib/types";
 
 const categoryImages: Record<string, string> = {
@@ -42,6 +42,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(categoriesQuery),
       context.queryClient.ensureQueryData(facetsQuery),
       context.queryClient.ensureQueryData(listingsQuery({ sort: "new", limit: 16 })),
+      context.queryClient.ensureQueryData(promotedListingsQuery(3, 4)),
     ]),
   component: Home,
 });
@@ -51,6 +52,7 @@ function Home() {
   const { data: facets } = useSuspenseQuery(facetsQuery);
   const { data: listings } = useSuspenseQuery(listingsQuery({ sort: "new", limit: 16 }));
 
+  const { data: promoted } = useSuspenseQuery(promotedListingsQuery(3, 4));
   const featured = listings.slice(0, 8);
   const recent = listings.slice(8, 16);
   const parents = categories.filter((category) => !category.parent_id);
@@ -119,6 +121,7 @@ function Home() {
         </section>
       ) : (
         <>
+          {promoted.length > 0 && <Section title="SUPER VIP" eyebrow="რეკლამა · დაწინაურებული განცხადებები" items={promoted} />}
           <Section title="რჩეული ნივთები" items={featured} />
           {recent.length > 0 && <Section title="ახლახან დამატებული" items={recent} />}
         </>
@@ -184,11 +187,14 @@ function CategoryTile({ category }: { category: Category }) {
   );
 }
 
-function Section({ title, items }: { title: string; items: Listing[] }) {
+function Section({ title, eyebrow, items }: { title: string; eyebrow?: string; items: Listing[] }) {
   return (
     <section className="container-page mt-14">
       <div className="mb-5 flex items-end justify-between">
-        <h2 className="text-2xl">{title}</h2>
+        <div>
+          {eyebrow && <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">{eyebrow}</p>}
+          <h2 className="text-2xl">{title}</h2>
+        </div>
         <Link to="/catalog" search={{}} className="text-sm text-muted-foreground hover:text-foreground">
           ყველა →
         </Link>

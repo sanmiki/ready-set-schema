@@ -27,3 +27,4 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [x] Seller phone contact (opt-in per listing, reveal + call), approximate location
 - [x] Listing fee (first free, then 0.50 ₾ from balance), wallet page, ledger, publish guard
 - [ ] Card payments + balance top-ups — blocked: no bank (TBC/BoG) merchant contract/credentials yet
+- [x] Promotion packages (VIP / VIP+ / SUPER VIP), highlight, bump — wallet only; card payment waits on a bank contract

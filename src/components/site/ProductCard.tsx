@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { Button } from "@/components/ui/button";
 import { conditionLabel, formatPrice } from "@/lib/labels";
+import { TIER_LABEL } from "@/lib/promotions";
 import type { Listing } from "@/lib/types";
 
 // One card in every grid: photo, title, price and the short meta line.
@@ -15,7 +16,7 @@ export function ProductCard({ listing }: { listing: Listing }) {
     <Link
       to="/product/$id"
       params={{ id: listing.id }}
-      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+      className={`group block rounded-2xl ${listing.highlighted ? "outline outline-1 outline-offset-[6px] outline-sage/60" : ""} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background`}
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted transition-shadow duration-200 group-hover:shadow-lift">
         {cover?.src ? (
@@ -34,6 +35,12 @@ export function ProductCard({ listing }: { listing: Listing }) {
         )}
 
         <FavoriteButton productId={listing.id} className="absolute right-3 top-3" />
+
+        {listing.status === "active" && !!listing.promoTier && (
+          <span className="absolute left-3 top-3 rounded-full bg-foreground/85 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-background backdrop-blur">
+            {TIER_LABEL[listing.promoTier]} · რეკლამა
+          </span>
+        )}
 
         {listing.status !== "active" && (
           <span className="absolute left-3 top-3 rounded-full bg-card/95 px-2.5 py-1 text-[11px] font-medium backdrop-blur">

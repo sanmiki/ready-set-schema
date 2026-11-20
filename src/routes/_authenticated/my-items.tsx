@@ -134,6 +134,11 @@ function ItemRow({ listing }: { listing: Listing }) {
         )}
         {listing.status === "active" && (
           <>
+            <Button asChild size="sm" className="rounded-full">
+              <Link to="/promote/$id" params={{ id: listing.id }}>
+                პრომო სერვისის დამატება
+              </Link>
+            </Button>
             <Button size="sm" variant="outline" className="rounded-full" onClick={() => void changeStatus("reserved")}>
               დაჯავშნა
             </Button>

@@ -157,6 +157,69 @@ export type Database = {
           },
         ]
       }
+      listing_promotions: {
+        Row: {
+          amount_tetri: number
+          bump_mode: string
+          created_at: string
+          days: number
+          ends_at: string
+          highlight: boolean
+          id: string
+          idempotency_key: string
+          method: string
+          product_id: string
+          starts_at: string
+          tier: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_tetri: number
+          bump_mode?: string
+          created_at?: string
+          days: number
+          ends_at: string
+          highlight?: boolean
+          id?: string
+          idempotency_key: string
+          method: string
+          product_id: string
+          starts_at?: string
+          tier?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_tetri?: number
+          bump_mode?: string
+          created_at?: string
+          days?: number
+          ends_at?: string
+          highlight?: boolean
+          id?: string
+          idempotency_key?: string
+          method?: string
+          product_id?: string
+          starts_at?: string
+          tier?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_promotions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_publications: {
         Row: {
           amount_tetri: number
@@ -398,6 +461,24 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_prices: {
+        Row: {
+          code: string
+          tetri: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          tetri: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          tetri?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seller_contacts: {
         Row: {
           phone: string
@@ -506,7 +587,36 @@ export type Database = {
           updated_at: string
         }[]
       }
+      promoted_listings: {
+        Args: never
+        Returns: {
+          highlighted: boolean
+          product_id: string
+          rank_at: string
+          tier_rank: number
+        }[]
+      }
+      promotion_quote: {
+        Args: {
+          _bump: string
+          _days: number
+          _highlight: boolean
+          _tier: string
+        }
+        Returns: number
+      }
       publish_listing: { Args: { _product_id: string }; Returns: string }
+      purchase_promotion: {
+        Args: {
+          _bump: string
+          _days: number
+          _highlight: boolean
+          _key: string
+          _product_id: string
+          _tier: string
+        }
+        Returns: string
+      }
       start_conversation: { Args: { _product_id: string }; Returns: string }
       wallet_balance: { Args: never; Returns: number }
     }
@@ -515,7 +625,7 @@ export type Database = {
       payment_status: "pending" | "paid" | "failed" | "canceled"
       product_status: "draft" | "active" | "reserved" | "sold"
       publication_method: "free" | "wallet" | "card" | "legacy"
-      wallet_tx_kind: "topup" | "listing_charge" | "refund"
+      wallet_tx_kind: "topup" | "listing_charge" | "refund" | "promotion_charge"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -647,7 +757,7 @@ export const Constants = {
       payment_status: ["pending", "paid", "failed", "canceled"],
       product_status: ["draft", "active", "reserved", "sold"],
       publication_method: ["free", "wallet", "card", "legacy"],
-      wallet_tx_kind: ["topup", "listing_charge", "refund"],
+      wallet_tx_kind: ["topup", "listing_charge", "refund", "promotion_charge"],
     },
   },
 } as const

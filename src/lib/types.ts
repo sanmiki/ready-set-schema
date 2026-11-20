@@ -37,6 +37,9 @@ export type Listing = {
   category: { name: string; slug: string } | null;
   seller: Seller | null;
   images: ListingImage[];
+  // 0 = none, 1 = VIP, 2 = VIP+, 3 = SUPER VIP. Only set on public lists.
+  promoTier?: number;
+  highlighted?: boolean;
 };
 
 export type ListingQuery = {

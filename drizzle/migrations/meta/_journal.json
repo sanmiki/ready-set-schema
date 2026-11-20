@@ -71,6 +71,13 @@
       "when": 1794954633960,
       "tag": "0009_listing_fees_wallet_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795135005479,
+      "tag": "0010_listing_promotions",
+      "breakpoints": true
     }
   ]
 }

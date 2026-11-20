@@ -6,6 +6,7 @@ import {
   listCategories,
   listFacets,
   listListings,
+  listPromotedListings,
   listRelatedListings,
 } from "./catalog.functions";
 import { getMyListing, getMyProfile, listMyListings } from "./seller.functions";
@@ -66,4 +67,10 @@ export const myWalletQuery = (userId: string | null) =>
     queryKey: ["my-wallet", userId],
     queryFn: () => getMyWallet(),
     enabled: !!userId,
+  });
+
+export const promotedListingsQuery = (minTier: number, limit = 8) =>
+  queryOptions({
+    queryKey: ["promoted-listings", minTier, limit],
+    queryFn: () => listPromotedListings({ data: { minTier, limit } }),
   });

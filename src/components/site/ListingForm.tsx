@@ -90,6 +90,7 @@ export function ListingForm({
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [wantPromo, setWantPromo] = useState(false);
 
   const totalPhotos = keptPhotos.length + newPhotos.length;
   const firstNew = newPhotos[0];
@@ -208,7 +209,8 @@ export function ListingForm({
 
         await queryClient.invalidateQueries();
         toast.success("ნივთი გამოქვეყნდა");
-        navigate({ to: "/product/$id", params: { id: created.id } });
+        if (wantPromo) navigate({ to: "/promote/$id", params: { id: created.id } });
+        else navigate({ to: "/product/$id", params: { id: created.id } });
         return;
       }
 
@@ -529,6 +531,23 @@ export function ListingForm({
       </Section>
 
       {mode === "create" && <ListingFeeNotice />}
+
+      {mode === "create" && (
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 text-sm transition-colors duration-200 hover:border-sage">
+          <input
+            type="checkbox"
+            checked={wantPromo}
+            onChange={(event) => setWantPromo(event.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
+          />
+          <span>
+            <span className="font-medium">პრომო სერვისის არჩევა გამოქვეყნების შემდეგ</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              არასავალდებულოა. VIP, გამორჩევა ან ავტომატური აწევა — ფასს ნახავთ გადახდამდე.
+            </span>
+          </span>
+        </label>
+      )}
 
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
