@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -80,8 +81,13 @@ export const createListing = createServerFn({ method: "POST" })
 // Attaches the uploaded photos and, for a new listing, puts it on sale.
 export const finalizeListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; paths: string[]; publish: boolean }) => input)
-  .handler(async ({ data, context }): Promise<Ok> => {
+  .inputValidator(
+    (input: { id: string; paths: string[]; publish: boolean; promo?: z.input<typeof promoSchema> | null }) => ({
+      ...input,
+      promo: input.promo ? promoSchema.parse(input.promo) : null,
+    }),
+  )
+  .handler(async ({ data, context }): Promise<Ok & { pending?: boolean }> => {
     const paths = data.paths.filter((path) => path.length > 0).slice(0, MAX_PHOTOS);
     if (data.publish && paths.length === 0) return { ok: false, message: "ატვირთეთ ერთი ფოტო მაინც." };
 
@@ -98,9 +104,45 @@ export const finalizeListing = createServerFn({ method: "POST" })
       if (error) return { ok: false, message: "ფოტოების მიმაგრება ვერ მოხერხდა." };
     }
 
-    if (data.publish) return publishThroughFee(context.supabase, data.id);
+    if (!data.publish) return { ok: true, id: data.id };
+
+    const promo = data.promo;
+    const wantsPromo = !!promo && (promo.tier !== null || promo.highlight || promo.bump !== "none");
+    if (!wantsPromo) return publishThroughFee(context.supabase, data.id);
+
+    // Fee and promotion prices come from the database; publish only if the
+    // verified wallet balance covers both, otherwise keep it as a draft.
+    const [fee, quote, balance] = await Promise.all([
+      context.supabase.rpc("listing_fee_quote"),
+      context.supabase.rpc("promotion_quote", {
+        _tier: promo.tier as string, _days: promo.days, _highlight: promo.highlight, _bump: promo.bump,
+      }),
+      context.supabase.rpc("wallet_balance"),
+    ]);
+    if (fee.error || quote.error || balance.error || quote.data == null || quote.data < 0) {
+      return { ok: false, message: TRY_AGAIN };
+    }
+    if ((balance.data ?? 0) < (fee.data ?? 0) + quote.data) {
+      return { ok: true, id: data.id, pending: true };
+    }
+    const published = await publishThroughFee(context.supabase, data.id);
+    if (!published.ok) return published;
+    const { data: bought, error } = await context.supabase.rpc("purchase_promotion", {
+      _product_id: data.id, _tier: promo.tier as string, _days: promo.days,
+      _highlight: promo.highlight, _bump: promo.bump, _key: `new-${data.id}`,
+    });
+    if (error || (bought !== "purchased" && bought !== "duplicate")) {
+      return { ok: false, message: "ნივთი გამოქვეყნდა, მაგრამ პრომო ვერ გააქტიურდა. სცადეთ „ჩემი ნივთებიდან“." };
+    }
     return { ok: true, id: data.id };
   });
+
+const promoSchema = z.object({
+  tier: z.enum(["vip", "vip_plus", "super_vip"]).nullable(),
+  days: z.union([z.literal(1), z.literal(3), z.literal(7)]),
+  highlight: z.boolean(),
+  bump: z.enum(["none", "once", "daily"]),
+});
 
 export const updateListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

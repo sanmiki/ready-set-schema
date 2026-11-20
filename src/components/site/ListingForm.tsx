@@ -19,6 +19,9 @@ import { useQuery } from "@tanstack/react-query";
 import { createListing, deleteListing, finalizeListing, setListingImages, updateListing } from "@/lib/seller.functions";
 import type { Category, Listing } from "@/lib/types";
 import { canPayFromBalance, formatTetri } from "@/lib/pricing";
+import { getPromotionPrices } from "@/lib/promotions.functions";
+import { DURATIONS, TIERS, quoteLines, quoteTotal, type BumpMode, type PromotionChoice } from "@/lib/promotions";
+import { cn } from "@/lib/utils";
 import { myWalletQuery } from "@/lib/queries";
 import { firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 
@@ -32,6 +35,8 @@ const SECTIONS = [
   { id: "sec-details", label: "კატეგორია და მდგომარეობა" },
   { id: "sec-price", label: "ფასი და მდებარეობა" },
   { id: "sec-contact", label: "საკონტაქტო" },
+  { id: "sec-promo", label: "პრომო სერვისები" },
+  { id: "sec-summary", label: "ჯამი" },
 ] as const;
 
 function Section({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
@@ -90,7 +95,7 @@ export function ListingForm({
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [wantPromo, setWantPromo] = useState(false);
+  const [promo, setPromo] = useState<PromotionChoice>({ tier: null, days: 3, highlight: false, bump: "none" });
 
   const totalPhotos = keptPhotos.length + newPhotos.length;
   const firstNew = newPhotos[0];
@@ -197,7 +202,7 @@ export function ListingForm({
         });
 
         const published = await finalizeListing({
-          data: { id: created.id, paths: uploaded, publish: true },
+          data: { id: created.id, paths: uploaded, publish: true, promo },
         });
         if (!published.ok) {
           // The listing is saved as a draft; retry from "my items" instead of creating a duplicate.
@@ -208,9 +213,13 @@ export function ListingForm({
         }
 
         await queryClient.invalidateQueries();
+        if ("pending" in published && published.pending) {
+          toast.message("ნივთი შენახულია მონახაზად — გადახდის მოლოდინში. ონლაინ გადახდა მალე დაემატება.");
+          navigate({ to: "/my-items" });
+          return;
+        }
         toast.success("ნივთი გამოქვეყნდა");
-        if (wantPromo) navigate({ to: "/promote/$id", params: { id: created.id } });
-        else navigate({ to: "/product/$id", params: { id: created.id } });
+        navigate({ to: "/product/$id", params: { id: created.id } });
         return;
       }
 
@@ -263,7 +272,7 @@ export function ListingForm({
     <form onSubmit={handleSubmit} noValidate className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[200px_minmax(0,1fr)_300px] xl:gap-8">
       <nav aria-label="ფორმის ნაწილები" className="hidden xl:block">
         <ol className="sticky top-24 space-y-0.5 border-l border-border text-sm">
-          {SECTIONS.map((section) => (
+          {SECTIONS.filter((section) => mode === "create" || !["sec-promo", "sec-summary"].includes(section.id)).map((section) => (
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
@@ -530,24 +539,8 @@ export function ListingForm({
         </div>
       </Section>
 
-      {mode === "create" && <ListingFeeNotice />}
-
-      {mode === "create" && (
-        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 text-sm transition-colors duration-200 hover:border-sage">
-          <input
-            type="checkbox"
-            checked={wantPromo}
-            onChange={(event) => setWantPromo(event.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
-          />
-          <span>
-            <span className="font-medium">პრომო სერვისის არჩევა გამოქვეყნების შემდეგ</span>
-            <span className="mt-0.5 block text-xs text-muted-foreground">
-              არასავალდებულოა. VIP, გამორჩევა ან ავტომატური აწევა — ფასს ნახავთ გადახდამდე.
-            </span>
-          </span>
-        </label>
-      )}
+      {mode === "create" && <PromoSection choice={promo} onChange={setPromo} />}
+      {mode === "create" && <PriceSummary choice={promo} />}
 
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -616,38 +609,158 @@ function categoryOptions(categories: Category[]) {
   ));
 }
 
-function ListingFeeNotice() {
-  const { user } = useSession();
-  const { data } = useQuery(myWalletQuery(user?.id ?? null));
-  if (!data) return null;
-  if (data.nextFee === 0) {
-    return (
-      <section className="rounded-2xl bg-sage-soft px-5 py-4 text-sm font-medium text-sage-deep">
-        პირველი განცხადება უფასოა
-      </section>
+const PRICES_KEY = ["promotion-prices"] as const;
+const hasPaidPromo = (c: PromotionChoice) => c.tier !== null || c.highlight || c.bump !== "none";
+
+function PromoSection({ choice, onChange }: { choice: PromotionChoice; onChange: (c: PromotionChoice) => void }) {
+  const { data: prices } = useQuery({ queryKey: PRICES_KEY, queryFn: () => getPromotionPrices() });
+  const set = (patch: Partial<PromotionChoice>) => onChange({ ...choice, ...patch });
+  const card = (active: boolean) =>
+    cn(
+      "flex cursor-pointer items-start gap-3 rounded-2xl border bg-card p-4 text-sm transition-all duration-200 hover:border-sage",
+      active ? "border-primary shadow-card ring-1 ring-primary" : "border-border",
     );
-  }
-  const enough = canPayFromBalance(data.balance, data.nextFee);
+  const dot = (active: boolean) =>
+    cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors", active ? "border-primary" : "border-input");
+  const gel = (t?: number) => (t == null ? "—" : formatTetri(t));
+
   return (
-    <section className="space-y-3 rounded-2xl border border-border bg-card p-4 text-sm">
-      <p className="font-medium">განცხადების ატვირთვის საფასური: {formatTetri(data.nextFee)}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <div className="rounded-xl border border-primary p-3">
-          <p className="font-medium">ბალანსით გადახდა</p>
-          <p className="text-xs text-muted-foreground">
-            ბალანსი: {formatTetri(data.balance)}
-            {enough ? "" : " — არასაკმარისია"}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border p-3 opacity-60" aria-disabled>
-          <p className="font-medium">ბარათით გადახდა</p>
-          <p className="text-xs text-muted-foreground">დროებით მიუწვდომელია</p>
+    <Section id="sec-promo" title="პრომო სერვისები" hint="არასავალდებულოა — აირჩიეთ ახლა, გამოქვეყნებამდე.">
+      <div role="radiogroup" aria-label="პრომო პაკეტი" className="grid gap-3 sm:grid-cols-2">
+        <label className={card(choice.tier === null)}>
+          <input type="radio" name="tier" className="sr-only" checked={choice.tier === null} onChange={() => set({ tier: null })} />
+          <span className={dot(choice.tier === null)}>{choice.tier === null && <span className="h-2 w-2 rounded-full bg-primary" />}</span>
+          <span>
+            <span className="font-medium">პრომოს გარეშე</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">ჩვეულებრივი განცხადება</span>
+          </span>
+        </label>
+        {TIERS.map((t) => {
+          const active = choice.tier === t.code;
+          return (
+            <label key={t.code} className={card(active)}>
+              <input type="radio" name="tier" className="sr-only" checked={active} onChange={() => set({ tier: t.code })} />
+              <span className={dot(active)}>{active && <span className="h-2 w-2 rounded-full bg-primary" />}</span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-baseline justify-between gap-2">
+                  <span className="font-semibold tracking-tight">{t.name}</span>
+                  <span className="text-sm font-medium">{gel(prices?.[t.code])}<span className="text-xs text-muted-foreground"> / დღე</span></span>
+                </span>
+                <span className="mt-1 block text-xs text-muted-foreground">{t.benefits.join(" · ")}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+
+      <div className="mt-6">
+        <p className="text-sm font-medium">ხანგრძლივობა</p>
+        <div className="mt-2 inline-flex rounded-full border border-border bg-card p-1">
+          {DURATIONS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              aria-pressed={choice.days === d}
+              onClick={() => set({ days: d })}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm transition-colors duration-200",
+                choice.days === d ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {d} დღე
+            </button>
+          ))}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">
-        გადასახდელი: {formatTetri(data.nextFee)}. რედაქტირება უფასოა.
-        {enough ? "" : " ბალანსის გარეშე ნივთი მონახაზად შეინახება."}
-      </p>
-    </section>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <label className={card(choice.highlight)}>
+          <input type="checkbox" checked={choice.highlight} onChange={(e) => set({ highlight: e.target.checked })} className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]" />
+          <span>
+            <span className="font-medium">ფერის გამოკვეთა</span>
+            <span className="ml-1 text-muted-foreground">{gel(prices?.highlight)} / დღე</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">ბარათს ნაზი გამოკვეთა დაემატება.</span>
+          </span>
+        </label>
+        <div className={card(choice.bump !== "none")}>
+          <input
+            type="checkbox"
+            aria-label="ავტომატური განახლება"
+            checked={choice.bump !== "none"}
+            onChange={(e) => set({ bump: e.target.checked ? "once" : "none" })}
+            className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
+          />
+          <span className="flex-1">
+            <span className="font-medium">ავტომატური განახლება</span>
+            <span className="ml-1 text-muted-foreground">{gel(prices?.bump)} / ჯერზე</span>
+            {choice.bump !== "none" && (
+              <span className="mt-2 flex gap-2">
+                {(["once", "daily"] as BumpMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    aria-pressed={choice.bump === m}
+                    onClick={() => set({ bump: m })}
+                    className={cn(
+                      "rounded-full border px-3 py-1 text-xs transition-colors",
+                      choice.bump === m ? "border-primary bg-sage-soft text-foreground" : "border-border text-muted-foreground",
+                    )}
+                  >
+                    {m === "once" ? "ერთჯერადად" : "ყოველდღე"}
+                  </button>
+                ))}
+              </span>
+            )}
+          </span>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function PriceSummary({ choice }: { choice: PromotionChoice }) {
+  const { user } = useSession();
+  const { data: wallet } = useQuery(myWalletQuery(user?.id ?? null));
+  const { data: prices } = useQuery({ queryKey: PRICES_KEY, queryFn: () => getPromotionPrices() });
+  const fee = wallet?.nextFee ?? 0;
+  const lines = prices ? quoteLines(prices, choice) : [];
+  const promoTotal = prices ? quoteTotal(prices, choice) : 0;
+  const total = fee + promoTotal;
+  const paid = total > 0;
+  const enough = wallet ? canPayFromBalance(wallet.balance, total) : false;
+
+  return (
+    <Section id="sec-summary" title="ჯამი">
+      <dl className="space-y-2 text-sm">
+        <div className="flex justify-between gap-4">
+          <dt>განცხადების გამოქვეყნება</dt>
+          <dd className="font-medium">{fee === 0 ? "უფასო" : formatTetri(fee)}</dd>
+        </div>
+        {lines.map((l) => (
+          <div key={l.label} className="flex justify-between gap-4">
+            <dt>
+              {l.label} <span className="text-xs text-muted-foreground">{l.detail}</span>
+            </dt>
+            <dd className="font-medium">{formatTetri(l.tetri)}</dd>
+          </div>
+        ))}
+        <div className="flex justify-between gap-4 border-t border-border pt-3 text-base">
+          <dt className="font-semibold">სულ</dt>
+          <dd className="font-semibold">{total === 0 ? "უფასო" : formatTetri(total)}</dd>
+        </div>
+      </dl>
+      {fee === 0 && !hasPaidPromo(choice) && (
+        <p className="mt-3 rounded-xl bg-sage-soft px-4 py-2.5 text-sm text-sage-deep">პირველი განცხადება უფასოა</p>
+      )}
+      {paid && wallet && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          ბალანსი: {formatTetri(wallet.balance)}.{" "}
+          {enough
+            ? "თანხა ბალანსიდან ჩამოიჭრება გამოქვეყნებისას."
+            : "ბალანსი არასაკმარისია — ნივთი მონახაზად შეინახება გადახდამდე. ონლაინ გადახდა მალე დაემატება."}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-muted-foreground">პრომო არასავალდებულოა. რედაქტირება უფასოა.</p>
+    </Section>
   );
 }
