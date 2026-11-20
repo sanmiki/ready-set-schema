@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contactPhoneError, formatGeorgianPhone, normalizeGeorgianPhone, PHONE_ERROR, PHONE_REQUIRED, telHref } from "@/lib/phone";
+import { contactPhoneError, formatGeorgianPhone, normalizeGeorgianPhone, PHONE_ERROR, PHONE_REQUIRED, telHref, visibleContactPhone } from "@/lib/phone";
 
 describe("Georgian phone numbers", () => {
   it("normalizes local mobile numbers to E.164", () => {
@@ -15,6 +15,18 @@ describe("Georgian phone numbers", () => {
   it("builds a tel: link from the normalized number", () => {
     expect(telHref("+995555123456")).toBe("tel:+995555123456");
     expect(formatGeorgianPhone("+995555123456")).toBe("+995 555 12 34 56");
+  });
+});
+
+describe("Automatic public listing contact", () => {
+  it("shows an active listing's valid contact number without a visibility opt-in", () => {
+    expect(visibleContactPhone("555 12 34 56", "active")).toBe("+995555123456");
+  });
+  it("does not expose a number on a non-active listing", () => {
+    expect(visibleContactPhone("+995555123456", "reserved")).toBeNull();
+  });
+  it("keeps an older active listing without a number accessible without inventing one", () => {
+    expect(visibleContactPhone(null, "active")).toBeNull();
   });
 });
 

@@ -90,7 +90,6 @@ export function ListingForm({
   }));
   const [phone, setPhone] = useState<string | null>(null);
   const [phoneAttempted, setPhoneAttempted] = useState(false);
-  const [phonePublic, setPhonePublic] = useState<boolean | null>(null);
   const [whatsapp, setWhatsapp] = useState<boolean | null>(null);
   const { data: contact } = useQuery({
     queryKey: ["my-listing-contact", user?.id ?? null, listing?.id ?? "new"],
@@ -98,12 +97,11 @@ export function ListingForm({
     enabled: !!user,
   });
   const phoneValue = phone ?? contact?.phone ?? "";
-  const phoneIsPublic = phonePublic ?? contact?.isPublic ?? false;
   const phoneValid = !!normalizeGeorgianPhone(phoneValue);
   const publishing = mode === "create" || listing?.status === "active";
   const phoneError = contactPhoneError(phoneValue, publishing);
   const visiblePhoneError = phoneAttempted ? phoneError : null;
-  const whatsappOn = phoneValid && phoneIsPublic && (whatsapp ?? contact?.whatsapp ?? false);
+  const whatsappOn = phoneValid && (whatsapp ?? contact?.whatsapp ?? false);
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
   const [error, setError] = useState<string | null>(null);
@@ -235,7 +233,7 @@ export function ListingForm({
         }
 
         const contactSaved = await saveListingContact({
-          data: { productId: created.id, phone: phoneValue, isPublic: phoneIsPublic, whatsapp: whatsappOn },
+          data: { productId: created.id, phone: phoneValue, whatsapp: whatsappOn },
         });
         if (!contactSaved.ok) {
           toast.error(contactSaved.message);
@@ -276,7 +274,7 @@ export function ListingForm({
       }
 
       const contactSaved = await saveListingContact({
-        data: { productId: listing.id, phone: phoneValue, isPublic: phoneIsPublic, whatsapp: whatsappOn },
+        data: { productId: listing.id, phone: phoneValue, whatsapp: whatsappOn },
       });
       if (!contactSaved.ok) {
         setError(contactSaved.message);
@@ -587,30 +585,15 @@ export function ListingForm({
             />
             {visiblePhoneError && <p id="phone-error" role="alert" className="mt-1.5 text-xs text-destructive">{visiblePhoneError}</p>}
           </div>
-          <label className="flex items-start gap-3 self-end text-sm">
-            <input
-              type="checkbox"
-              checked={phoneIsPublic}
-              disabled={!phoneValue.trim()}
-              onChange={(event) => setPhonePublic(event.target.checked)}
-              className="mt-1 h-4 w-4 accent-primary"
-            />
-            <span>ნომრის ჩვენება ამ განცხადებაზე</span>
-          </label>
-          <label className="flex items-start gap-3 text-sm md:col-start-2">
+          <label className="flex items-start gap-3 self-end text-sm md:col-start-2">
             <input
               type="checkbox"
               checked={whatsappOn}
-              disabled={!phoneValid || !phoneIsPublic}
+              disabled={!phoneValid}
               onChange={(event) => setWhatsapp(event.target.checked)}
               className="mt-1 h-4 w-4 accent-primary"
             />
-            <span>
-              ამ ნომერზე WhatsApp-იც მაქვს
-              <span className="block text-xs text-muted-foreground">
-                ხელმისაწვდომია მხოლოდ მაშინ, როცა ნომრის ჩვენება ჩართულია.
-              </span>
-            </span>
+            <span>ამ ნომერზე WhatsApp-იც მაქვს</span>
           </label>
         </div>
       </Section>

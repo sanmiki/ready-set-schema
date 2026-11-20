@@ -120,6 +120,13 @@
       "when": 1795139648832,
       "tag": "0016_require_phone_when_publishing",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795140294943,
+      "tag": "0017_automatic_public_listing_phone",
+      "breakpoints": true
     }
   ]
 }

@@ -28,6 +28,12 @@ export function contactPhoneError(input: string, publishing: boolean): string | 
   return normalizeGeorgianPhone(input) ? null : PHONE_ERROR;
 }
 
+// Only an active listing's own valid contact number is shown to visitors.
+export function visibleContactPhone(phone: string | null | undefined, status: string): string | null {
+  if (status !== "active" || !phone) return null;
+  return normalizeGeorgianPhone(phone);
+}
+
 // wa.me wants digits only, e.g. 995555123456.
 export function whatsappHref(e164: string, title: string, url: string): string {
   const digits = e164.replace(/\D/g, "");

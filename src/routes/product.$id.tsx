@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSession";
-import { listingHasPublicPhone, listingWhatsapp } from "@/lib/contact.functions";
+import { listingPublicPhone, listingWhatsapp } from "@/lib/contact.functions";
 import { conditionLabel, formatDate, formatPrice, statusLabel } from "@/lib/labels";
+import { visibleContactPhone } from "@/lib/phone";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
 
@@ -67,14 +68,13 @@ function ProductPage() {
     enabled: !!user,
   });
 
-  // The phone button appears only when the seller opted in on a live listing.
   const { data: waPhone } = useQuery({
     queryKey: ["listing-whatsapp", id],
     queryFn: () => listingWhatsapp({ data: { productId: id } }),
   });
-  const { data: hasPhone } = useQuery({
-    queryKey: ["listing-has-phone", id],
-    queryFn: () => listingHasPublicPhone({ data: { productId: id } }),
+  const { data: publicPhone } = useQuery({
+    queryKey: ["listing-public-phone", id],
+    queryFn: () => listingPublicPhone({ data: { productId: id } }),
     enabled: listing?.status === "active",
   });
 
@@ -84,6 +84,7 @@ function ProductPage() {
 
   if (!listing) return null;
 
+  const contactPhone = visibleContactPhone(publicPhone, listing.status);
   const images = listing.images;
   const cover = images[activeImage] ?? images[0] ?? null;
   const isOwner = !!mine;
@@ -240,12 +241,12 @@ function ProductPage() {
             <section className="mt-6 surface p-5">
               <h2 className="text-sm font-medium">გამყიდველთან დაკავშირება</h2>
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                <PhoneContact productId={listing.id} hasPhone={hasPhone === true} />
+                <PhoneContact phone={contactPhone} />
                 <WhatsAppContact productId={listing.id} title={listing.title} phone={waPhone} />
                 <ContactSeller
                   productId={listing.id}
                   isOwner={isOwner}
-                  variant={hasPhone ? "outline" : "default"}
+                  variant={contactPhone ? "outline" : "default"}
                 />
               </div>
               <ReportListing productId={listing.id} isOwner={isOwner} />

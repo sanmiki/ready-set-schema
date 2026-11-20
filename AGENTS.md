@@ -49,7 +49,7 @@ use the editor.
   shows it.
 - Never seed demo listings or fake purchase states. The shop shows only real
   rows, and an empty shop shows a Georgian empty state.
-- Listing phone numbers live in owner-only `listing_contacts` (per-listing `is_public`), private defaults in `seller_contacts`; the public reads them only via security-definer RPCs that require opt-in and a live listing, so phones never leak through product/profile selects.
+- Listing phone numbers live in owner-only `listing_contacts`, private defaults in `seller_contacts`; public phone reads use security-definer RPCs that require a live listing and ignore the deprecated `is_public` flag, while WhatsApp remains a separate opt-in — so phones never leak through product/profile selects.
 - Listing publication goes only through the security-definer publish_listing RPC (trigger blocks non-draft status without a listing_publications row); wallet ledger is append-only integer tetri — so pricing can't be bypassed via the API.
 - Promotions are bought only through the security-definer purchase_promotion RPC, which recomputes the price from promotion_prices and debits the wallet ledger atomically; ranking reads promoted_listings(), which computes a separate rank time and ignores expired promotions and non-live listings — so clients can't grant themselves placement and created_at is never rewritten.
 - Admin access: roles live only in `user_roles` (no self-grant policy); every admin read/write goes through SECURITY DEFINER `admin_*` RPCs that call `require_admin()` and write `admin_audit_log` (append-only) — so the /admin route gate is UX only and the database is the boundary.
