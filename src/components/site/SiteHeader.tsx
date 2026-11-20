@@ -38,7 +38,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center gap-3 md:gap-6">
         <Link to="/" className="shrink-0 font-sans text-xl font-semibold tracking-[0.08em]" aria-label="MEORADI — მთავარი">
-          MEORADI<span className="text-primary">.</span>
+          MEORADI<span className="text-primary"></span>
         </Link>
 
         <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="მთავარი ნავიგაცია">
