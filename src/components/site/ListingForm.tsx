@@ -564,7 +564,7 @@ export function ListingForm({
       </div>
       </Section>
 
-      <Section id="sec-contact" title="საკონტაქტო ნომერი" hint="გამოქვეყნებისთვის აუცილებელია. მყიდველები შეძლებენ მოგწერონ შიდა ჩატითაც.">
+      <Section id="sec-contact" title="საკონტაქტო ნომერი">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="phone">საკონტაქტო ნომერი{publishing && <span className="text-destructive"> *</span>}</Label>
@@ -595,12 +595,7 @@ export function ListingForm({
               onChange={(event) => setPhonePublic(event.target.checked)}
               className="mt-1 h-4 w-4 accent-primary"
             />
-            <span>
-              ნომრის ჩვენება ამ განცხადებაზე
-              <span className="block text-xs text-muted-foreground">
-                ჩართვის შემთხვევაში ნებისმიერ ვიზიტორს შეეძლება ნომრის ნახვა და დარეკვა. გამორთვა ნებისმიერ დროს შეგიძლიათ.
-              </span>
-            </span>
+            <span>ნომრის ჩვენება ამ განცხადებაზე</span>
           </label>
           <label className="flex items-start gap-3 text-sm md:col-start-2">
             <input
