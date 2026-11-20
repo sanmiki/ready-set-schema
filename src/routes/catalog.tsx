@@ -1,7 +1,8 @@
 import { LISTING_CATEGORIES } from "@/lib/listing-categories";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Search, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 
 import { EmptyState, ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export type CatalogSearch = {
 };
 
 const selectClass =
-  "h-10 w-full rounded-full border border-input bg-card px-4 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring";
+  "h-10 w-full min-w-0 truncate rounded-full border border-input bg-card px-3 text-sm md:px-4 outline-none transition focus-visible:ring-2 focus-visible:ring-ring";
 
 function toQuery(search: CatalogSearch): ListingQuery {
   return {
@@ -111,15 +112,18 @@ function Catalog() {
   const hasFilters =
     !!(search.q || search.category || search.audience || search.brand || search.size || search.condition || search.city || search.min !== undefined || search.max !== undefined);
 
+  const activeFilterCount = [audienceValue, categoryValue, search.brand, search.size, search.condition, search.city, search.min, search.max, search.sort].filter((v) => v !== undefined && v !== "").length;
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   function update(patch: CatalogSearch) {
     navigate({ to: "/catalog", search: { ...search, ...patch } });
   }
 
   return (
-    <div className="container-page py-8">
+    <div className="container-page py-6 md:py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl">კატალოგი</h1>
+          <h1 className="text-2xl md:text-3xl">კატალოგი</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isFetching ? "ვიძიებთ…" : `${items.length} ნივთი`}
           </p>
@@ -134,7 +138,7 @@ function Catalog() {
         )}
       </div>
 
-      <div className="mt-6 grid gap-4 surface p-4 md:grid-cols-12">
+      <div className="mt-4 grid gap-3 surface p-3 md:mt-6 md:grid-cols-12 md:gap-4 md:p-4">
         <form
           className="md:col-span-4"
           onSubmit={(event) => {
@@ -155,6 +159,30 @@ function Catalog() {
           </label>
         </form>
 
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((v) => !v)}
+          aria-expanded={filtersOpen}
+          aria-controls="catalog-filters"
+          className="flex h-11 w-full items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium md:hidden"
+        >
+          <SlidersHorizontal className="h-4 w-4" aria-hidden />
+          ფილტრი
+          {activeFilterCount > 0 && (
+            <span className="rounded-full bg-primary px-2 text-xs leading-5 text-primary-foreground">{activeFilterCount}</span>
+          )}
+          <ChevronDown
+            className={`ml-auto h-4 w-4 text-muted-foreground transition-transform duration-[var(--motion-base)] ease-[var(--ease-standard)] ${filtersOpen ? "rotate-180" : ""}`}
+            aria-hidden
+          />
+        </button>
+
+        <div
+          id="catalog-filters"
+          className={`grid transition-[grid-template-rows,opacity] duration-[var(--motion-slow)] ease-[var(--ease-standard)] md:contents ${filtersOpen ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0 md:visible md:opacity-100"}`}
+        >
+        <div className="min-h-0 overflow-hidden md:contents">
+        <div className="grid grid-cols-2 gap-3 md:contents">
         <select
           aria-label="ვისთვის"
           className={`${selectClass} md:col-span-2`}
@@ -249,7 +277,7 @@ function Catalog() {
           ))}
         </select>
 
-        <div className="flex items-center gap-2 md:col-span-4">
+        <div className="col-span-2 flex items-center gap-2 md:col-span-4">
           <Input
             type="number"
             min={0}
@@ -283,6 +311,9 @@ function Catalog() {
             </option>
           ))}
         </select>
+        </div>
+        </div>
+        </div>
       </div>
 
       {items.length === 0 ? (
@@ -293,7 +324,7 @@ function Catalog() {
           />
         </div>
       ) : (
-        <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-4 md:mt-10 md:gap-y-8 md:grid-cols-3 lg:grid-cols-4">
           {items.map((listing) => (
             <ProductCard key={listing.id} listing={listing} />
           ))}
