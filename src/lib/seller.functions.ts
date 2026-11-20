@@ -7,7 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hydrateListings, resolveCategoryId, signUrls } from "./db";
 import { BUCKET, MAX_PHOTOS } from "./media";
 import type { Listing, Profile, Result } from "./types";
-import { audienceRequired, categoryNotAudience, firstMessage, listingFieldsSchema, profileFieldsSchema } from "./validation";
+import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema, profileFieldsSchema } from "./validation";
 
 type Status = Database["public"]["Enums"]["product_status"];
 type Ok = Result;
@@ -54,7 +54,7 @@ export const createListing = createServerFn({ method: "POST" })
     if (!fields.ok) return fields;
     const audienceError = audienceRequired(fields.values);
     if (audienceError) return { ok: false, message: audienceError };
-    const createCategoryError = categoryNotAudience(fields.values.categorySlug);
+    const createCategoryError = categoryNotAllowed(fields.values.categorySlug);
     if (createCategoryError) return { ok: false, message: createCategoryError };
 
     const categoryId = await resolveCategoryId(context.supabase, fields.values.categorySlug);
@@ -159,7 +159,7 @@ export const updateListing = createServerFn({ method: "POST" })
     const owned = await ownedProductId(context.supabase, context.userId, data.id);
     if (!owned) return { ok: false, message: NOT_FOUND };
 
-    const editCategoryError = categoryNotAudience(parsed.data.categorySlug);
+    const editCategoryError = categoryNotAllowed(parsed.data.categorySlug);
     if (editCategoryError) return { ok: false, message: editCategoryError };
     const categoryId = await resolveCategoryId(context.supabase, parsed.data.categorySlug);
 

@@ -1,3 +1,4 @@
+import { LISTING_CATEGORIES } from "@/lib/listing-categories";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
@@ -6,7 +7,7 @@ import { EmptyState, ProductCard, ProductCardSkeleton } from "@/components/site/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CITIES, CONDITIONS, SIZES, SORTS, type Sort } from "@/lib/labels";
-import { AUDIENCE_LABELS, AUDIENCE_VALUES, isAudience, productTypeOptions } from "@/lib/audience";
+import { AUDIENCE_LABELS, AUDIENCE_VALUES, isAudience } from "@/lib/audience";
 import { categoriesQuery, facetsQuery, listingsQuery } from "@/lib/queries";
 import type { ListingQuery } from "@/lib/types";
 
@@ -185,7 +186,7 @@ function Catalog() {
           }
         >
           <option value="">ყველა კატეგორია</option>
-          {productTypeOptions(categories, categoryValue).map((c) => (
+          {LISTING_CATEGORIES.map((c) => (
             <option key={c.slug} value={c.slug}>
               {c.name}
             </option>

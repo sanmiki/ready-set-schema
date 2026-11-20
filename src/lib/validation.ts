@@ -1,3 +1,4 @@
+import { isListingCategorySlug } from "./listing-categories";
 import { z } from "zod";
 
 // Every user-facing string here is Georgian: these messages are what the seller
@@ -91,4 +92,11 @@ export const CATEGORY_IS_AUDIENCE = "აირჩიეთ ნივთის �
 // Audience values are not product categories.
 export function categoryNotAudience(slug: string | undefined): string | null {
   return slug && ["men", "women", "kids", "unisex"].includes(slug) ? CATEGORY_IS_AUDIENCE : null;
+}
+
+export const CATEGORY_NOT_IN_LIST = "აირჩიეთ კატეგორია სიიდან";
+// Listings may only use the fixed category list; empty stays allowed.
+export function categoryNotAllowed(slug: string | undefined): string | null {
+  if (!slug) return null;
+  return categoryNotAudience(slug) ?? (isListingCategorySlug(slug) ? null : CATEGORY_NOT_IN_LIST);
 }

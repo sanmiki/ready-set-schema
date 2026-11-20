@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Baby, ImagePlus, Loader2, User, UserRound, Users, X } from "lucide-react";
-import { productTypeOptions } from "@/lib/audience";
+import { CategoryCombobox } from "./CategoryCombobox";
 import { conditionLabel, formatPrice } from "@/lib/labels";
 import { toast } from "sonner";
 
@@ -24,7 +24,7 @@ import { getPromotionPrices } from "@/lib/promotions.functions";
 import { DURATIONS, TIERS, quoteLines, quoteTotal, type BumpMode, type PromotionChoice } from "@/lib/promotions";
 import { cn } from "@/lib/utils";
 import { myWalletQuery } from "@/lib/queries";
-import { audienceRequired, categoryNotAudience, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
+import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 
 const selectClass =
   "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/20";
@@ -161,7 +161,7 @@ export function ListingForm({
   }
 
   const legacyCategory =
-    values.categorySlug && categoryNotAudience(values.categorySlug)
+    values.categorySlug && categoryNotAllowed(values.categorySlug)
       ? (categories.find((c) => c.slug === values.categorySlug) ?? null)
       : null;
 
@@ -185,7 +185,7 @@ export function ListingForm({
       return;
     }
 
-    const categoryError = categoryNotAudience(values.categorySlug);
+    const categoryError = categoryNotAllowed(values.categorySlug);
     if (categoryError) {
       setError(categoryError);
       toast.error(categoryError);
@@ -432,24 +432,13 @@ export function ListingForm({
       <div className="mb-5 grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="category">კატეგორია</Label>
-          <select
+          <CategoryCombobox
             id="category"
             value={values.categorySlug ?? ""}
-            onChange={(event) => setField("categorySlug", event.target.value)}
-            className={`${selectClass} mt-1.5`}
-          >
-            <option value="">არ არის მითითებული</option>
-            {legacyCategory && (
-              <option value={legacyCategory.slug} disabled>
-                {legacyCategory.name} — აირჩიეთ ზუსტი კატეგორია
-              </option>
-            )}
-            {productTypeOptions(categories, values.categorySlug).map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            onChange={(slug) => setField("categorySlug", slug)}
+            invalidLabel={legacyCategory ? `${legacyCategory.name} — აირჩიეთ ახალი კატეგორია` : null}
+            className="mt-1.5"
+          />
           {legacyCategory && (
             <p className="mt-1.5 text-xs text-destructive">ამ განცხადების კატეგორია მოძველებულია — აირჩიეთ ნივთის ტიპი.</p>
           )}
