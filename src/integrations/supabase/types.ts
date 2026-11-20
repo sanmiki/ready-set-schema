@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_suspensions: {
+        Row: {
+          created_at: string
+          reason: string
+          suspended_by: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          reason?: string
+          suspended_by: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          reason?: string
+          suspended_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_suspensions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          id: string
+          meta: Json
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           id: string
@@ -150,6 +209,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "listing_contacts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listing_moderation: {
+        Row: {
+          created_at: string
+          kind: string
+          moderated_by: string
+          previous_status: Database["public"]["Enums"]["product_status"]
+          product_id: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          kind: string
+          moderated_by: string
+          previous_status: Database["public"]["Enums"]["product_status"]
+          product_id: string
+          reason?: string
+        }
+        Update: {
+          created_at?: string
+          kind?: string
+          moderated_by?: string
+          previous_status?: Database["public"]["Enums"]["product_status"]
+          product_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_moderation_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: true
             referencedRelation: "products"
@@ -333,6 +427,36 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          contact_email: string
+          contact_phone: string
+          first_listing_free: boolean
+          id: boolean
+          listing_fee_tetri: number
+          moderation_note: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string
+          contact_phone?: string
+          first_listing_free?: boolean
+          id?: boolean
+          listing_fee_tetri?: number
+          moderation_note?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string
+          contact_phone?: string
+          first_listing_free?: boolean
+          id?: boolean
+          listing_fee_tetri?: number
+          moderation_note?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           id: string
@@ -479,6 +603,70 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          admin_decision: string | null
+          created_at: string
+          details: string
+          id: string
+          product_id: string | null
+          reason: string
+          reported_user_id: string | null
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          admin_decision?: string | null
+          created_at?: string
+          details?: string
+          id?: string
+          product_id?: string | null
+          reason: string
+          reported_user_id?: string | null
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          admin_decision?: string | null
+          created_at?: string
+          details?: string
+          id?: string
+          product_id?: string | null
+          reason?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reported_user_id_fkey"
+            columns: ["reported_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_contacts: {
         Row: {
           phone: string
@@ -504,6 +692,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
       wallet_transactions: {
         Row: {
@@ -558,6 +767,118 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_finance: { Args: { _limit: number }; Returns: Json }
+      admin_listings: {
+        Args: {
+          _category: string
+          _limit: number
+          _offset: number
+          _q: string
+          _since: string
+          _status: string
+        }
+        Returns: {
+          category_name: string
+          created_at: string
+          id: string
+          image_path: string
+          moderation: string
+          moderation_reason: string
+          price: number
+          reports: number
+          seller_id: string
+          seller_username: string
+          status: Database["public"]["Enums"]["product_status"]
+          title: string
+          total: number
+        }[]
+      }
+      admin_moderate_listing: {
+        Args: { _action: string; _product_id: string; _reason: string }
+        Returns: string
+      }
+      admin_promotions: {
+        Args: { _limit: number; _offset: number }
+        Returns: {
+          amount_tetri: number
+          bump_mode: string
+          days: number
+          ends_at: string
+          highlight: boolean
+          id: string
+          method: string
+          paid: boolean
+          product_id: string
+          product_title: string
+          seller_username: string
+          starts_at: string
+          tier: string
+          total: number
+        }[]
+      }
+      admin_reports: {
+        Args: { _limit: number; _offset: number; _status: string }
+        Returns: {
+          admin_decision: string
+          created_at: string
+          details: string
+          id: string
+          product_id: string
+          product_title: string
+          reason: string
+          reported_user_id: string
+          reported_username: string
+          reporter_username: string
+          reviewed_at: string
+          status: string
+          total: number
+        }[]
+      }
+      admin_set_suspension: {
+        Args: { _reason: string; _suspend: boolean; _user_id: string }
+        Returns: string
+      }
+      admin_stats: { Args: never; Returns: Json }
+      admin_update_report: {
+        Args: { _decision: string; _report_id: string; _status: string }
+        Returns: string
+      }
+      admin_update_settings: {
+        Args: {
+          _email: string
+          _fee: number
+          _first_free: boolean
+          _note: string
+          _phone: string
+          _prices: Json
+        }
+        Returns: string
+      }
+      admin_users: {
+        Args: { _limit: number; _offset: number; _q: string; _status: string }
+        Returns: {
+          active_listings: number
+          city: string
+          created_at: string
+          display_name: string
+          id: string
+          listings: number
+          reports: number
+          suspended: boolean
+          suspension_reason: string
+          total: number
+          username: string
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
+      is_suspended: { Args: { _uid: string }; Returns: boolean }
       listing_fee_quote: { Args: never; Returns: number }
       listing_has_public_phone: {
         Args: { _product_id: string }
@@ -617,10 +938,12 @@ export type Database = {
         }
         Returns: string
       }
+      require_admin: { Args: never; Returns: string }
       start_conversation: { Args: { _product_id: string }; Returns: string }
       wallet_balance: { Args: never; Returns: number }
     }
     Enums: {
+      app_role: "admin"
       payment_purpose: "topup" | "listing"
       payment_status: "pending" | "paid" | "failed" | "canceled"
       product_status: "draft" | "active" | "reserved" | "sold"
@@ -753,6 +1076,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin"],
       payment_purpose: ["topup", "listing"],
       payment_status: ["pending", "paid", "failed", "canceled"],
       product_status: ["draft", "active", "reserved", "sold"],

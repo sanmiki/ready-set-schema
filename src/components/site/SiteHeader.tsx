@@ -1,6 +1,7 @@
 import type React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { amIAdmin } from "@/lib/admin.functions";
 import { ChevronDown, Heart, MessageCircle, Plus, Search } from "lucide-react";
 import { useInbox } from "@/hooks/useInbox";
 
@@ -26,6 +27,8 @@ export function SiteHeader() {
   const unread = (inbox.data ?? []).reduce((sum, row) => sum + Number(row.unread_count), 0);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: adminCheck } = useQuery({ queryKey: ["am-i-admin", user?.id ?? null], queryFn: () => amIAdmin(), enabled: !!user, staleTime: 300_000 });
+  const isAdmin = adminCheck?.admin === true;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -139,6 +142,11 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link to="/wallet">ჩემი ბალანსი</Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">ადმინისტრირება</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => void handleSignOut()} className="text-destructive">
                   გამოსვლა

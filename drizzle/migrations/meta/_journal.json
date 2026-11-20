@@ -78,6 +78,13 @@
       "when": 1795135005479,
       "tag": "0010_listing_promotions",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795136004608,
+      "tag": "0011_admin_dashboard",
+      "breakpoints": true
     }
   ]
 }

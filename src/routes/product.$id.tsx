@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { ContactSeller } from "@/components/site/ContactSeller";
+import { ReportListing } from "@/components/site/ReportListing";
 import { PhoneContact, WhatsAppContact } from "@/components/site/SellerContact";
 import {
   AlertDialog,
@@ -247,6 +248,7 @@ function ProductPage() {
                   variant={hasPhone ? "outline" : "default"}
                 />
               </div>
+              <ReportListing productId={listing.id} isOwner={isOwner} />
             </section>
           )}
         </div>
