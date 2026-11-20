@@ -31,4 +31,4 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 
 ## Admin dashboard
 - [x] Admin role, suspensions, moderation, reports, settings, audit log (database)
-- [ ] Grant admin to Sandro's account — blocked: no MEORADI account uses his Lovable email yet
+- [x] Admin granted to sandrosulashvili07@gmail.com
