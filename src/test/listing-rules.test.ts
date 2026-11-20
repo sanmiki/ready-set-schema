@@ -57,3 +57,17 @@ describe("Account rules", () => {
     }
   });
 });
+
+import { audienceRequired } from "@/lib/validation";
+
+describe("Listing audience", () => {
+  it("requires an audience for new listings", () => {
+    expect(audienceRequired({ audience: "" })).toBe("აირჩიეთ, ვისთვისაა ნივთი");
+  });
+  it("accepts men, women and kids only", () => {
+    for (const a of ["men", "women", "kids"]) {
+      expect(listingFieldsSchema.safeParse({ ...listing, audience: a }).success).toBe(true);
+    }
+    expect(listingFieldsSchema.safeParse({ ...listing, audience: "pets" }).success).toBe(false);
+  });
+});

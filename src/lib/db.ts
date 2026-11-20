@@ -148,6 +148,7 @@ export async function hydrateListings(
     price: Number(row.price),
     city: row.city,
     neighborhood: row.neighborhood ?? null,
+    audience: (row.audience ?? null) as Listing["audience"],
     status: row.status as Listing["status"],
     created_at: row.created_at,
     updated_at: row.updated_at,

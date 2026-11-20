@@ -31,6 +31,7 @@ export type Listing = {
   price: number;
   city: string | null;
   neighborhood: string | null;
+  audience: "men" | "women" | "kids" | null;
   status: Status;
   created_at: string;
   updated_at: string;

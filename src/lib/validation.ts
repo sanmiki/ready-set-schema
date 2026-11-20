@@ -31,7 +31,17 @@ export const listingFieldsSchema = z.object({
   city: optionalText(80, "ქალაქი 80 სიმბოლოზე მეტი ვერ იქნება"),
   neighborhood: optionalText(80, "უბანი 80 სიმბოლოზე მეტი ვერ იქნება"),
   categorySlug: optionalText(60, "კატეგორია 60 სიმბოლოზე მეტი ვერ იქნება"),
+  // Optional here so older listings without a value stay editable; new listings
+  // must pass audienceRequired below.
+  audience: z.enum(["men", "women", "kids"]).optional().or(z.literal("")),
 });
+
+export const AUDIENCE_REQUIRED = "აირჩიეთ, ვისთვისაა ნივთი";
+
+// New listings must name who the item is for.
+export function audienceRequired(values: { audience?: string | undefined }): string | null {
+  return values.audience ? null : AUDIENCE_REQUIRED;
+}
 
 export type ListingFields = z.infer<typeof listingFieldsSchema>;
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { Baby, ImagePlus, Loader2, User, UserRound, X } from "lucide-react";
 import { conditionLabel, formatPrice } from "@/lib/labels";
 import { toast } from "sonner";
 
@@ -23,7 +23,7 @@ import { getPromotionPrices } from "@/lib/promotions.functions";
 import { DURATIONS, TIERS, quoteLines, quoteTotal, type BumpMode, type PromotionChoice } from "@/lib/promotions";
 import { cn } from "@/lib/utils";
 import { myWalletQuery } from "@/lib/queries";
-import { firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
+import { audienceRequired, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 
 const selectClass =
   "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/20";
@@ -37,6 +37,12 @@ const SECTIONS = [
   { id: "sec-contact", label: "საკონტაქტო" },
   { id: "sec-promo", label: "პრომო სერვისები" },
   { id: "sec-summary", label: "ჯამი" },
+] as const;
+
+const AUDIENCES = [
+  { value: "men", label: "კაცი", Icon: User },
+  { value: "women", label: "ქალი", Icon: UserRound },
+  { value: "kids", label: "ბავშვი", Icon: Baby },
 ] as const;
 
 function Section({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
@@ -78,6 +84,7 @@ export function ListingForm({
     city: listing?.city ?? "",
     neighborhood: listing?.neighborhood ?? "",
     categorySlug: listing?.category?.slug ?? "",
+    audience: listing?.audience ?? "",
   }));
   const [phone, setPhone] = useState<string | null>(null);
   const [phonePublic, setPhonePublic] = useState<boolean | null>(null);
@@ -160,6 +167,14 @@ export function ListingForm({
       const message = firstMessage(parsed.error);
       setError(message);
       toast.error(message);
+      return;
+    }
+
+    const audienceError = mode === "create" ? audienceRequired(values) : null;
+    if (audienceError) {
+      setError(audienceError);
+      toast.error(audienceError);
+      document.getElementById("audience")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -372,6 +387,33 @@ export function ListingForm({
       </Section>
 
       <Section id="sec-details" title="კატეგორია და მდგომარეობა">
+      <fieldset id="audience" className="mb-6 scroll-mt-32">
+        <legend className="text-sm font-medium">
+          ვისთვისაა ნივთი?{mode === "create" && <span className="text-destructive"> *</span>}
+        </legend>
+        <div role="radiogroup" className="mt-2 grid grid-cols-3 gap-2 sm:gap-3">
+          {AUDIENCES.map(({ value, label, Icon }) => {
+            const selected = values.audience === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setField("audience", value)}
+                className={`flex flex-col items-center gap-2 rounded-xl border px-2 py-4 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  selected
+                    ? "border-primary bg-primary/10 text-foreground shadow-card"
+                    : "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:bg-secondary hover:text-foreground"
+                }`}
+              >
+                <Icon className={`h-5 w-5 transition-colors duration-200 ${selected ? "text-primary" : ""}`} strokeWidth={1.6} />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="category">კატეგორია</Label>

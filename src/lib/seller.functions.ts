@@ -7,7 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hydrateListings, resolveCategoryId, signUrls } from "./db";
 import { BUCKET, MAX_PHOTOS } from "./media";
 import type { Listing, Profile, Result } from "./types";
-import { firstMessage, listingFieldsSchema, profileFieldsSchema } from "./validation";
+import { audienceRequired, firstMessage, listingFieldsSchema, profileFieldsSchema } from "./validation";
 
 type Status = Database["public"]["Enums"]["product_status"];
 type Ok = Result;
@@ -52,6 +52,8 @@ export const createListing = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<Ok> => {
     const fields = fieldsOrMessage(data);
     if (!fields.ok) return fields;
+    const audienceError = audienceRequired(fields.values);
+    if (audienceError) return { ok: false, message: audienceError };
 
     const categoryId = await resolveCategoryId(context.supabase, fields.values.categorySlug);
 
@@ -69,6 +71,7 @@ export const createListing = createServerFn({ method: "POST" })
         city: fields.values.city || null,
         neighborhood: fields.values.neighborhood || null,
         category_id: categoryId,
+        audience: fields.values.audience || null,
         status: "draft",
       })
       .select("id")
@@ -169,6 +172,8 @@ export const updateListing = createServerFn({ method: "POST" })
         city: parsed.data.city || null,
         neighborhood: parsed.data.neighborhood || null,
         category_id: categoryId,
+        // Leaves an older listing's empty value alone unless the owner picks one.
+        ...(parsed.data.audience ? { audience: parsed.data.audience } : {}),
       })
       .eq("id", data.id)
       .eq("seller_id", context.userId);
