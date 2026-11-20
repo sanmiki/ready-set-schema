@@ -1,3 +1,4 @@
+import { isAudience } from "./audience";
 import { createServerFn } from "@tanstack/react-start";
 
 import { hydrateListings, publishableClient, resolveCategoryId, type Client } from "./db";
@@ -79,13 +80,20 @@ export const listListings = createServerFn({ method: "GET" })
     const client = publishableClient();
 
     let categoryIds: string[] | null = null;
-    if (data.category) {
+    // Old links used audience roots as categories; treat them as audience.
+    const audience = isAudience(data.audience) ? data.audience : isAudience(data.category) ? data.category : null;
+    const productType = isAudience(data.category) ? undefined : data.category;
+    if (productType) {
       const { data: all } = await client.from("categories").select("id,slug,parent_id");
       const rows = all ?? [];
-      const root = rows.find((category) => category.slug === data.category);
+      const root = rows.find((category) => category.slug === productType);
       if (!root) return [];
 
-      const wanted = new Set<string>([root.id]);
+      // Product types repeat under several audiences ("ჯინსები"); match all.
+      const { data: named } = await client.from("categories").select("id,name");
+      const rootName = (named ?? []).find((c) => c.id === root.id)?.name;
+      const wanted = new Set<string>((named ?? []).filter((c) => c.name === rootName).map((c) => c.id));
+      wanted.add(root.id);
       let grew = true;
       while (grew) {
         grew = false;
@@ -105,6 +113,7 @@ export const listListings = createServerFn({ method: "GET" })
     let query = client.from("products").select("*").eq("status", "active");
 
     if (categoryIds) query = query.in("category_id", categoryIds);
+    if (audience) query = query.eq("audience", audience);
     if (data.brand) query = query.eq("brand", data.brand);
     if (data.size) query = query.eq("size", data.size);
     if (data.condition) query = query.eq("condition", data.condition);

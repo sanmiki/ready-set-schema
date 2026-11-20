@@ -31,7 +31,7 @@ export type Listing = {
   price: number;
   city: string | null;
   neighborhood: string | null;
-  audience: "men" | "women" | "kids" | null;
+  audience: "men" | "women" | "kids" | "unisex" | null;
   status: Status;
   created_at: string;
   updated_at: string;
@@ -46,6 +46,7 @@ export type Listing = {
 export type ListingQuery = {
   q?: string | undefined;
   category?: string | undefined;
+  audience?: string | undefined;
   brand?: string | undefined;
   size?: string | undefined;
   condition?: string | undefined;

@@ -6,12 +6,14 @@ import { EmptyState, ProductCard, ProductCardSkeleton } from "@/components/site/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CITIES, CONDITIONS, SIZES, SORTS, type Sort } from "@/lib/labels";
+import { AUDIENCE_LABELS, AUDIENCE_VALUES, isAudience, productTypeOptions } from "@/lib/audience";
 import { categoriesQuery, facetsQuery, listingsQuery } from "@/lib/queries";
 import type { ListingQuery } from "@/lib/types";
 
 export type CatalogSearch = {
   q?: string | undefined;
   category?: string | undefined;
+  audience?: string | undefined;
   brand?: string | undefined;
   size?: string | undefined;
   condition?: string | undefined;
@@ -28,6 +30,7 @@ function toQuery(search: CatalogSearch): ListingQuery {
   return {
     q: search.q,
     category: search.category,
+    audience: search.audience,
     brand: search.brand,
     size: search.size,
     condition: search.condition,
@@ -52,6 +55,7 @@ function parseCatalogSearch(raw: Record<string, unknown>): CatalogSearch {
   return {
     q: text(raw["q"]),
     category: text(raw["category"]),
+    audience: text(raw["audience"]),
     brand: text(raw["brand"]),
     size: text(raw["size"]),
     condition: text(raw["condition"]),
@@ -100,9 +104,11 @@ function Catalog() {
   const { data: listings, isFetching } = useSuspenseQuery(listingsQuery(toQuery(search)));
 
   const items = listings;
-  const parents = categories.filter((category) => !category.parent_id);
+  // Legacy links pass an audience as ?category=women.
+  const audienceValue = search.audience ?? (isAudience(search.category) ? search.category : "");
+  const categoryValue = isAudience(search.category) ? "" : (search.category ?? "");
   const hasFilters =
-    !!(search.q || search.category || search.brand || search.size || search.condition || search.city || search.min !== undefined || search.max !== undefined);
+    !!(search.q || search.category || search.audience || search.brand || search.size || search.condition || search.city || search.min !== undefined || search.max !== undefined);
 
   function update(patch: CatalogSearch) {
     navigate({ to: "/catalog", search: { ...search, ...patch } });
@@ -129,7 +135,7 @@ function Catalog() {
 
       <div className="mt-6 grid gap-4 surface p-4 md:grid-cols-12">
         <form
-          className="md:col-span-5"
+          className="md:col-span-4"
           onSubmit={(event) => {
             event.preventDefault();
             const field = new FormData(event.currentTarget).get("q");
@@ -149,23 +155,40 @@ function Catalog() {
         </form>
 
         <select
+          aria-label="ვისთვის"
+          className={`${selectClass} md:col-span-2`}
+          value={audienceValue}
+          onChange={(event) =>
+            update({
+              audience: event.target.value || undefined,
+              category: isAudience(search.category) ? undefined : search.category,
+            })
+          }
+        >
+          <option value="">ყველასთვის</option>
+          {AUDIENCE_VALUES.map((value) => (
+            <option key={value} value={value}>
+              {AUDIENCE_LABELS[value]}
+            </option>
+          ))}
+        </select>
+
+        <select
           aria-label="კატეგორია"
-          className={`${selectClass} md:col-span-3`}
-          value={search.category ?? ""}
-          onChange={(event) => update({ category: event.target.value || undefined })}
+          className={`${selectClass} md:col-span-2`}
+          value={categoryValue}
+          onChange={(event) =>
+            update({
+              category: event.target.value || undefined,
+              audience: audienceValue || undefined,
+            })
+          }
         >
           <option value="">ყველა კატეგორია</option>
-          {parents.map((parent) => (
-            <optgroup key={parent.id} label={parent.name}>
-              <option value={parent.slug}>{parent.name} — ყველა</option>
-              {categories
-                .filter((category) => category.parent_id === parent.id)
-                .map((child) => (
-                  <option key={child.id} value={child.slug}>
-                    {child.name}
-                  </option>
-                ))}
-            </optgroup>
+          {productTypeOptions(categories, categoryValue).map((c) => (
+            <option key={c.slug} value={c.slug}>
+              {c.name}
+            </option>
           ))}
         </select>
 

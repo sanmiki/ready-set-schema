@@ -33,7 +33,7 @@ export const listingFieldsSchema = z.object({
   categorySlug: optionalText(60, "კატეგორია 60 სიმბოლოზე მეტი ვერ იქნება"),
   // Optional here so older listings without a value stay editable; new listings
   // must pass audienceRequired below.
-  audience: z.enum(["men", "women", "kids"]).optional().or(z.literal("")),
+  audience: z.enum(["men", "women", "kids", "unisex"]).optional().or(z.literal("")),
 });
 
 export const AUDIENCE_REQUIRED = "აირჩიეთ, ვისთვისაა ნივთი";
@@ -84,4 +84,11 @@ export const newPasswordSchema = z.object({
 
 export function firstMessage(error: z.ZodError): string {
   return error.issues[0]?.message ?? "მონაცემები არასწორია";
+}
+
+export const CATEGORY_IS_AUDIENCE = "აირჩიეთ ნივთის კატეგორია (კაცი/ქალი/ბავშვი/უნისექსი კატეგორია არ არის)";
+
+// Audience values are not product categories.
+export function categoryNotAudience(slug: string | undefined): string | null {
+  return slug && ["men", "women", "kids", "unisex"].includes(slug) ? CATEGORY_IS_AUDIENCE : null;
 }

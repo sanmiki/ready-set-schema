@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Baby, ImagePlus, Loader2, User, UserRound, X } from "lucide-react";
+import { Baby, ImagePlus, Loader2, User, UserRound, Users, X } from "lucide-react";
+import { productTypeOptions } from "@/lib/audience";
 import { conditionLabel, formatPrice } from "@/lib/labels";
 import { toast } from "sonner";
 
@@ -23,7 +24,7 @@ import { getPromotionPrices } from "@/lib/promotions.functions";
 import { DURATIONS, TIERS, quoteLines, quoteTotal, type BumpMode, type PromotionChoice } from "@/lib/promotions";
 import { cn } from "@/lib/utils";
 import { myWalletQuery } from "@/lib/queries";
-import { audienceRequired, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
+import { audienceRequired, categoryNotAudience, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 
 const selectClass =
   "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/20";
@@ -43,6 +44,7 @@ const AUDIENCES = [
   { value: "men", label: "კაცი", Icon: User },
   { value: "women", label: "ქალი", Icon: UserRound },
   { value: "kids", label: "ბავშვი", Icon: Baby },
+  { value: "unisex", label: "უნისექსი", Icon: Users },
 ] as const;
 
 function Section({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
@@ -158,6 +160,11 @@ export function ListingForm({
     return paths;
   }
 
+  const legacyCategory =
+    values.categorySlug && categoryNotAudience(values.categorySlug)
+      ? (categories.find((c) => c.slug === values.categorySlug) ?? null)
+      : null;
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
@@ -175,6 +182,14 @@ export function ListingForm({
       setError(audienceError);
       toast.error(audienceError);
       document.getElementById("audience")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    const categoryError = categoryNotAudience(values.categorySlug);
+    if (categoryError) {
+      setError(categoryError);
+      toast.error(categoryError);
+      document.getElementById("category")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -391,7 +406,7 @@ export function ListingForm({
         <legend className="text-sm font-medium">
           ვისთვისაა ნივთი?{mode === "create" && <span className="text-destructive"> *</span>}
         </legend>
-        <div role="radiogroup" className="mt-2 grid grid-cols-3 gap-2 sm:gap-3">
+        <div role="radiogroup" className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
           {AUDIENCES.map(({ value, label, Icon }) => {
             const selected = values.audience === value;
             return (
@@ -414,7 +429,7 @@ export function ListingForm({
           })}
         </div>
       </fieldset>
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="mb-5 grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="category">კატეგორია</Label>
           <select
@@ -424,10 +439,39 @@ export function ListingForm({
             className={`${selectClass} mt-1.5`}
           >
             <option value="">არ არის მითითებული</option>
-            {categoryOptions(categories)}
+            {legacyCategory && (
+              <option value={legacyCategory.slug} disabled>
+                {legacyCategory.name} — აირჩიეთ ზუსტი კატეგორია
+              </option>
+            )}
+            {productTypeOptions(categories, values.categorySlug).map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
           </select>
+          {legacyCategory && (
+            <p className="mt-1.5 text-xs text-destructive">ამ განცხადების კატეგორია მოძველებულია — აირჩიეთ ნივთის ტიპი.</p>
+          )}
         </div>
 
+        <div>
+          <Label htmlFor="condition">მდგომარეობა</Label>
+          <select
+            id="condition"
+            value={values.condition}
+            onChange={(event) => setField("condition", event.target.value as FormValues["condition"])}
+            className={`${selectClass} mt-1.5`}
+          >
+            {CONDITIONS.map((condition) => (
+              <option key={condition.value} value={condition.value}>
+                {condition.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="brand">ბრენდი</Label>
           <Input
@@ -467,21 +511,6 @@ export function ListingForm({
           />
         </div>
 
-        <div>
-          <Label htmlFor="condition">მდგომარეობა</Label>
-          <select
-            id="condition"
-            value={values.condition}
-            onChange={(event) => setField("condition", event.target.value as FormValues["condition"])}
-            className={`${selectClass} mt-1.5`}
-          >
-            {CONDITIONS.map((condition) => (
-              <option key={condition.value} value={condition.value}>
-                {condition.label}
-              </option>
-            ))}
-          </select>
-        </div>
 
       </div>
       </Section>
@@ -635,22 +664,6 @@ export function ListingForm({
 }
 
 // Parents first, then their children indented, so one flat list still reads as a tree.
-function categoryOptions(categories: Category[]) {
-  const parents = categories.filter((category) => !category.parent_id);
-  const childrenOf = (parentId: string) => categories.filter((category) => category.parent_id === parentId);
-
-  return parents.map((parent) => (
-    <optgroup key={parent.id} label={parent.name}>
-      <option value={parent.slug}>{parent.name} — ყველა</option>
-      {childrenOf(parent.id).map((child) => (
-        <option key={child.id} value={child.slug}>
-          {child.name}
-        </option>
-      ))}
-    </optgroup>
-  ));
-}
-
 const PRICES_KEY = ["promotion-prices"] as const;
 const hasPaidPromo = (c: PromotionChoice) => c.tier !== null || c.highlight || c.bump !== "none";
 

@@ -64,10 +64,30 @@ describe("Listing audience", () => {
   it("requires an audience for new listings", () => {
     expect(audienceRequired({ audience: "" })).toBe("აირჩიეთ, ვისთვისაა ნივთი");
   });
-  it("accepts men, women and kids only", () => {
-    for (const a of ["men", "women", "kids"]) {
+  it("accepts men, women, kids and unisex only", () => {
+    for (const a of ["men", "women", "kids", "unisex"]) {
       expect(listingFieldsSchema.safeParse({ ...listing, audience: a }).success).toBe(true);
     }
     expect(listingFieldsSchema.safeParse({ ...listing, audience: "pets" }).success).toBe(false);
+  });
+});
+
+import { categoryNotAudience } from "@/lib/validation";
+import { productTypeOptions } from "@/lib/audience";
+
+describe("Category dropdown", () => {
+  const cats = [
+    { id: "w", name: "ქალები", slug: "women", parent_id: null },
+    { id: "m", name: "კაცები", slug: "men", parent_id: null },
+    { id: "u", name: "უნისექსი", slug: "unisex", parent_id: null },
+    { id: "j1", name: "ჯინსები", slug: "jeans", parent_id: "w" },
+    { id: "j2", name: "ჯინსები", slug: "jeans-men", parent_id: "m" },
+  ];
+  it("excludes audience entries and lists each product type once", () => {
+    expect(productTypeOptions(cats).map((c) => c.name)).toEqual(["ჯინსები"]);
+  });
+  it("rejects audience values as a category", () => {
+    for (const a of ["men", "women", "kids", "unisex"]) expect(categoryNotAudience(a)).not.toBeNull();
+    expect(categoryNotAudience("jeans")).toBeNull();
   });
 });

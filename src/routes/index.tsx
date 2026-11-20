@@ -1,3 +1,4 @@
+import { isAudience } from "@/lib/audience";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
@@ -165,7 +166,7 @@ function CategoryTile({ category }: { category: Category }) {
   return (
     <Link
       to="/catalog"
-      search={{ category: category.slug }}
+      search={isAudience(category.slug) ? { audience: category.slug } : { category: category.slug }}
       className="group relative overflow-hidden rounded-2xl bg-muted"
     >
       {image ? (
