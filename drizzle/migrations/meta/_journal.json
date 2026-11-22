@@ -127,6 +127,13 @@
       "when": 1795140294943,
       "tag": "0017_automatic_public_listing_phone",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795386173216,
+      "tag": "0018_promotion_prices_signed_in_only",
+      "breakpoints": true
     }
   ]
 }

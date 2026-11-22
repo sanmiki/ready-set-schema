@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { publishableClient, type Client } from "./db";
+import type { Client } from "./db";
 import type { PromotionPrices } from "./promotions";
 
 async function readPrices(client: Client): Promise<PromotionPrices> {
@@ -79,4 +79,6 @@ export const purchasePromotion = createServerFn({ method: "POST" })
     return { ok: false, message: MESSAGES[result ?? ""] ?? "ოპერაცია ვერ მოხერხდა." };
   });
 
-export const getPromotionPrices = createServerFn({ method: "GET" }).handler(async () => readPrices(publishableClient()));
+export const getPromotionPrices = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => readPrices(context.supabase));
