@@ -155,6 +155,13 @@
       "when": 1795529030354,
       "tag": "0021_match_charges_to_current_legal_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795529285943,
+      "tag": "0022_restrict_promotion_price_table_access",
+      "breakpoints": true
     }
   ]
 }

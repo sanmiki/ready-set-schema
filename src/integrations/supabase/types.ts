@@ -956,6 +956,13 @@ export type Database = {
           tier_rank: number
         }[]
       }
+      promotion_price_list: {
+        Args: never
+        Returns: {
+          code: string
+          tetri: number
+        }[]
+      }
       promotion_quote: {
         Args: {
           _bump: string

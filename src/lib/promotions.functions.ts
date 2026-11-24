@@ -3,17 +3,10 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import type { Client } from "./db";
 import type { PromotionPrices } from "./promotions";
+import { readPrices } from "./promotion-prices";
 import { LEGAL_CONSENT_REQUIRED, paidServiceConsentError } from "./legal";
 import { recordPaidLegalConsent } from "./legal-consent.server";
-
-async function readPrices(client: Client): Promise<PromotionPrices> {
-  const { data, error } = await client.from("promotion_prices").select("code,tetri");
-  if (error) throw new Error("prices");
-  const map = Object.fromEntries((data ?? []).map((row) => [row.code, row.tetri]));
-  return map as PromotionPrices;
-}
 
 export type PromoteCheckout = {
   listing: { id: string; title: string; status: string } | null;
