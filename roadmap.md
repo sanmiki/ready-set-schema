@@ -30,7 +30,8 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [x] Persistent favorites (hearts, /favorites page, owner-only access)
 - [x] Seller phone contact (automatic public number and direct call on live listings), approximate location; WhatsApp remains opt-in
 - [x] Listing fee (first free, then 0.50 ₾ from balance), wallet page, ledger, publish guard
-- [ ] Flitt card payments + balance top-ups — blocked: legal review, real business/contact details, merchant approval and credentials are still needed; no live payments enabled
+- [x] Flitt card payments (test mode) for paid listings and promotions, callbacks, status sync, history, admin view
+- [ ] Flitt live mode — blocked: real merchant ID/secret, legal review and business details
 - [x] Promotion packages (VIP / VIP+ / SUPER VIP), highlight, bump — wallet only; card payment waits on a bank contract
 
 ## Admin dashboard

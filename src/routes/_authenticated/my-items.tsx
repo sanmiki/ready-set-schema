@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { LegalConsent } from "@/components/site/LegalConsent";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
+import { startCardPayment } from "@/lib/payments.functions";
 import { formatTetri } from "@/lib/pricing";
 import { formatPrice, statusLabel } from "@/lib/labels";
 import { myListingsQuery } from "@/lib/queries";
@@ -196,7 +197,7 @@ function ItemRow({ listing }: { listing: Listing }) {
         <AlertDialogHeader>
           <AlertDialogTitle>ფასიანი გამოქვეყნების დადასტურება</AlertDialogTitle>
           <AlertDialogDescription>
-            ამ განცხადების გამოქვეყნების საფასურია {formatTetri(consentAmount)}. თანხა ბალანსიდან ჩამოიჭრება მხოლოდ დადასტურების შემდეგ.
+            ამ განცხადების გამოქვეყნების საფასურია {formatTetri(consentAmount)}. გადაიხადეთ ბალანსით ან ბარათით (Flitt, სატესტო რეჟიმი).
           </AlertDialogDescription>
         </AlertDialogHeader>
         <LegalConsent
@@ -208,11 +209,22 @@ function ItemRow({ listing }: { listing: Listing }) {
         />
         <AlertDialogFooter>
           <AlertDialogCancel>გაუქმება</AlertDialogCancel>
+          <Button
+            variant="outline"
+            disabled={!legalAccepted}
+            onClick={async () => {
+              const r = await startCardPayment({ data: { service: "listing", productId: listing.id, legalConsent: { accepted: true, key: consentKey } } });
+              if (!r.ok) { toast.error(r.message); return; }
+              window.location.assign(r.url);
+            }}
+          >
+            ბარათით გადახდა
+          </Button>
           <AlertDialogAction
             disabled={!legalAccepted}
             onClick={() => void changeStatus("active", { accepted: true, key: consentKey })}
           >
-            გადახდა და გამოქვეყნება
+            ბალანსით გადახდა
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

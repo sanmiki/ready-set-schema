@@ -146,7 +146,7 @@ export function SiteHeader() {
                   <Link to="/profile">პროფილი</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/wallet">ჩემი ბალანსი</Link>
+                  <Link to="/wallet">ჩემი ბალანსი</Link></DropdownMenuItem><DropdownMenuItem asChild><Link to="/payments">გადახდები</Link>
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem asChild>

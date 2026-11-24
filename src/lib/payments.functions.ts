@@ -43,8 +43,9 @@ export const startCardPayment = createServerFn({ method: "POST" })
       if (!q || q <= 0) return { ok: false, message: START_ERRORS["invalid"]! };
       amount = q;
     } else {
-      const { data: fee } = await db.rpc("listing_fee_tetri" as never);
-      amount = typeof fee === "number" && fee > 0 ? fee : 50;
+      const { data: fee } = await db.rpc("listing_fee_quote");
+      if (!fee || fee <= 0) return { ok: false, message: START_ERRORS["free"]! };
+      amount = fee;
     }
     const consentOk = await recordPaidLegalConsent(db, {
       context: data.service, contextKey: data.legalConsent.key, productId: data.productId, amountTetri: amount,

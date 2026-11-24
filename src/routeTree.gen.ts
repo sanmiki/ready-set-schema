@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedFavoritesRouteImport } from './routes/_authenticated/favorites'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedMyItemsRouteImport } from './routes/_authenticated/my-items'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSellRouteImport } from './routes/_authenticated/sell'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
@@ -36,6 +37,7 @@ import { Route as AuthenticatedAdminPromotionsRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedPaymentIdRouteImport } from './routes/_authenticated/payment.$id'
 import { Route as AuthenticatedPromoteIdRouteImport } from './routes/_authenticated/promote.$id'
 import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell_.$id'
 import { Route as ApiPublicFlittCallbackRouteImport } from './routes/api/public/flitt-callback'
@@ -116,6 +118,11 @@ const AuthenticatedMyItemsRoute = AuthenticatedMyItemsRouteImport.update({
   path: '/my-items',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -181,6 +188,11 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedPaymentIdRoute = AuthenticatedPaymentIdRouteImport.update({
+  id: '/payment/$id',
+  path: '/payment/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPromoteIdRoute = AuthenticatedPromoteIdRouteImport.update({
   id: '/promote/$id',
   path: '/promote/$id',
@@ -222,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof AuthenticatedFavoritesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/my-items': typeof AuthenticatedMyItemsRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRoute
   '/wallet': typeof AuthenticatedWalletRoute
@@ -233,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/payment/$id': typeof AuthenticatedPaymentIdRoute
   '/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/flitt-callback': typeof ApiPublicFlittCallbackRoute
@@ -254,6 +268,7 @@ export interface FileRoutesByTo {
   '/favorites': typeof AuthenticatedFavoritesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/my-items': typeof AuthenticatedMyItemsRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/sell': typeof AuthenticatedSellRoute
   '/wallet': typeof AuthenticatedWalletRoute
@@ -265,6 +280,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/payment/$id': typeof AuthenticatedPaymentIdRoute
   '/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
   '/api/public/flitt-callback': typeof ApiPublicFlittCallbackRoute
@@ -289,6 +305,7 @@ export interface FileRoutesById {
   '/_authenticated/favorites': typeof AuthenticatedFavoritesRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/my-items': typeof AuthenticatedMyItemsRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/sell': typeof AuthenticatedSellRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
@@ -300,6 +317,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/payment/$id': typeof AuthenticatedPaymentIdRoute
   '/_authenticated/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/_authenticated/sell_/$id': typeof AuthenticatedSellIdRoute
   '/api/public/flitt-callback': typeof ApiPublicFlittCallbackRoute
@@ -324,6 +342,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/messages'
     | '/my-items'
+    | '/payments'
     | '/profile'
     | '/sell'
     | '/wallet'
@@ -335,6 +354,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/users'
+    | '/payment/$id'
     | '/promote/$id'
     | '/sell/$id'
     | '/api/public/flitt-callback'
@@ -356,6 +376,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/messages'
     | '/my-items'
+    | '/payments'
     | '/profile'
     | '/sell'
     | '/wallet'
@@ -367,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/users'
+    | '/payment/$id'
     | '/promote/$id'
     | '/sell/$id'
     | '/api/public/flitt-callback'
@@ -390,6 +412,7 @@ export interface FileRouteTypes {
     | '/_authenticated/favorites'
     | '/_authenticated/messages'
     | '/_authenticated/my-items'
+    | '/_authenticated/payments'
     | '/_authenticated/profile'
     | '/_authenticated/sell'
     | '/_authenticated/wallet'
@@ -401,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/users'
+    | '/_authenticated/payment/$id'
     | '/_authenticated/promote/$id'
     | '/_authenticated/sell_/$id'
     | '/api/public/flitt-callback'
@@ -534,6 +558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyItemsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -618,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/payment/$id': {
+      id: '/_authenticated/payment/$id'
+      path: '/payment/$id'
+      fullPath: '/payment/$id'
+      preLoaderRoute: typeof AuthenticatedPaymentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/promote/$id': {
       id: '/_authenticated/promote/$id'
       path: '/promote/$id'
@@ -689,9 +727,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFavoritesRoute: typeof AuthenticatedFavoritesRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedMyItemsRoute: typeof AuthenticatedMyItemsRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSellRoute: typeof AuthenticatedSellRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
+  AuthenticatedPaymentIdRoute: typeof AuthenticatedPaymentIdRoute
   AuthenticatedPromoteIdRoute: typeof AuthenticatedPromoteIdRoute
   AuthenticatedSellIdRoute: typeof AuthenticatedSellIdRoute
 }
@@ -701,9 +741,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFavoritesRoute: AuthenticatedFavoritesRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedMyItemsRoute: AuthenticatedMyItemsRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSellRoute: AuthenticatedSellRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
+  AuthenticatedPaymentIdRoute: AuthenticatedPaymentIdRoute,
   AuthenticatedPromoteIdRoute: AuthenticatedPromoteIdRoute,
   AuthenticatedSellIdRoute: AuthenticatedSellIdRoute,
 }

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LegalConsent } from "@/components/site/LegalConsent";
 import { getPromoteCheckout, purchasePromotion } from "@/lib/promotions.functions";
+import { startCardPayment } from "@/lib/payments.functions";
 import { paidServiceConsentError } from "@/lib/legal";
 import {
   DURATIONS,
@@ -92,6 +93,18 @@ function PromotePage() {
       toast.success("პრომო სერვისი გააქტიურდა");
       setKey(crypto.randomUUID());
       await queryClient.invalidateQueries();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function payByCard() {
+    if (total === 0 || !live || !legalAccepted) return;
+    setBusy(true);
+    try {
+      const result = await startCardPayment({ data: { service: "promotion", productId: id, tier, days, highlight, bump, legalConsent: { accepted: true, key } } });
+      if (!result.ok) { toast.error(result.message); return; }
+      window.location.assign(result.url);
     } finally {
       setBusy(false);
     }
@@ -242,10 +255,10 @@ function PromotePage() {
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}
               ბალანსით გადახდა
             </Button>
-            <Button variant="outline" className="mt-2 h-12 w-full rounded-full" disabled>
+            <Button variant="outline" className="mt-2 h-12 w-full rounded-full" disabled={busy || total === 0 || !live || !legalAccepted} onClick={() => void payByCard()}>
               ბარათით გადახდა
             </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground">ონლაინ გადახდა მალე დაემატება</p>
+            <p className="mt-3 text-center text-xs text-muted-foreground">ბარათით გადახდა Flitt-ის სატესტო რეჟიმშია</p>
             <Link to="/product/$id" params={{ id }} className="mt-4 block text-center text-sm text-muted-foreground underline-offset-4 hover:underline">
               გაგრძელება პრომოს გარეშე
             </Link>
@@ -255,7 +268,7 @@ function PromotePage() {
 
       <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
         <span className="text-sm">სულ <strong className="ml-1 text-lg">{formatTetri(total)}</strong></span>
-        <span className="text-xs text-muted-foreground">ონლაინ გადახდა მალე დაემატება</span>
+        <span className="text-xs text-muted-foreground">ბალანსით ან ბარათით (ტესტი)</span>
       </div>
     </div>
   );
