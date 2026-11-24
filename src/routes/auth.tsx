@@ -154,20 +154,16 @@ function AuthPage() {
 
   async function handleOAuth(provider: "google" | "lovable") {
     setError(null);
-    if (mode === "signup") {
-      if (!legalAccepted) {
-        setError("რეგისტრაციისთვის დაგვიდასტურეთ, რომ ეთანხმებით მონახაზ დოკუმენტებს.");
-        return;
-      }
-      prepareRegistrationConsent();
-    } else {
-      clearPendingRegistrationConsent();
+    if (!legalAccepted) {
+      setError("გაგრძელებისთვის დაგვიდასტურეთ, რომ ეთანხმებით მონახაზ დოკუმენტებს.");
+      return;
     }
+    prepareRegistrationConsent();
     const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      if (mode === "signup") clearPendingRegistrationConsent();
+      clearPendingRegistrationConsent();
       setError(translateAuthError(result.error.message));
       return;
     }
@@ -199,17 +195,15 @@ function AuthPage() {
             : "შექმენით ანგარიში — უფასოა."}
         </p>
 
-        {mode === "signup" && (
-          <div className="mt-5">
-            <LegalConsent
-              id="registration-legal-consent"
-              checked={legalAccepted}
-              onChange={setLegalAccepted}
-              kind="registration"
-              disabled={busy}
-            />
-          </div>
-        )}
+        <div className="mt-5">
+          <LegalConsent
+            id="registration-legal-consent"
+            checked={legalAccepted}
+            onChange={setLegalAccepted}
+            kind="registration"
+            disabled={busy}
+          />
+        </div>
 
         <div className="mt-6 space-y-3">
           <Button
@@ -217,7 +211,7 @@ function AuthPage() {
             variant="outline"
             className="h-11 w-full rounded-full text-sm font-medium"
             style={providerButtonStyle}
-            disabled={busy || (mode === "signup" && !legalAccepted)}
+            disabled={busy || !legalAccepted}
             onClick={() => void handleOAuth("google")}
           >
             <GoogleIcon />
@@ -228,7 +222,7 @@ function AuthPage() {
             variant="outline"
             className="h-11 w-full rounded-full text-sm font-medium"
             style={providerButtonStyle}
-            disabled={busy || (mode === "signup" && !legalAccepted)}
+            disabled={busy || !legalAccepted}
             onClick={() => void handleOAuth("lovable")}
           >
             <span className="mr-2 text-base leading-none">◆</span>
