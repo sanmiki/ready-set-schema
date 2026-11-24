@@ -70,6 +70,7 @@ function Shell(props: { icon: React.ReactNode; title: string; text?: string; pro
       {props.retry && <Button className="mt-6 rounded-full" onClick={props.retry}>თავიდან ცდა</Button>}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {props.productId && <Button asChild className="rounded-full"><Link to="/product/$id" params={{ id: props.productId }}>ნივთის ნახვა</Link></Button>}
+        <Button asChild variant="outline" className="rounded-full"><Link to="/my-items">ჩემი ნივთები</Link></Button>
         <Button asChild variant="outline" className="rounded-full"><Link to="/payments">გადახდების ისტორია</Link></Button>
       </div>
     </div>

@@ -176,6 +176,20 @@
       "when": 1795549503361,
       "tag": "0024_payment_events_allow_unlink",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795550887186,
+      "tag": "0025_combined_listing_checkout",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795550907481,
+      "tag": "0026_checkout_free_publication_guard",
+      "breakpoints": true
     }
   ]
 }

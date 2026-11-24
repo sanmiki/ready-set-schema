@@ -220,6 +220,61 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_checkouts: {
+        Row: {
+          bump: string
+          completed: boolean
+          days: number
+          highlight: boolean
+          payment_id: string | null
+          product_id: string
+          tier: string | null
+          user_id: string
+        }
+        Insert: {
+          bump?: string
+          completed?: boolean
+          days?: number
+          highlight?: boolean
+          payment_id?: string | null
+          product_id: string
+          tier?: string | null
+          user_id: string
+        }
+        Update: {
+          bump?: string
+          completed?: boolean
+          days?: number
+          highlight?: boolean
+          payment_id?: string | null
+          product_id?: string
+          tier?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_checkouts_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_checkouts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_checkouts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_contacts: {
         Row: {
           is_public: boolean
@@ -461,6 +516,7 @@ export type Database = {
         Row: {
           activation_result: string | null
           amount_tetri: number
+          checkout_url: string | null
           confirmed_at: string | null
           consent_key: string | null
           created_at: string
@@ -484,6 +540,7 @@ export type Database = {
         Insert: {
           activation_result?: string | null
           amount_tetri: number
+          checkout_url?: string | null
           confirmed_at?: string | null
           consent_key?: string | null
           created_at?: string
@@ -507,6 +564,7 @@ export type Database = {
         Update: {
           activation_result?: string | null
           amount_tetri?: number
+          checkout_url?: string | null
           confirmed_at?: string | null
           consent_key?: string | null
           created_at?: string
@@ -1095,6 +1153,16 @@ export type Database = {
         Returns: undefined
       }
       require_admin: { Args: never; Returns: string }
+      save_listing_checkout: {
+        Args: {
+          _bump: string
+          _days: number
+          _highlight: boolean
+          _product_id: string
+          _tier: string
+        }
+        Returns: Json
+      }
       start_conversation: { Args: { _product_id: string }; Returns: string }
       wallet_balance: { Args: never; Returns: number }
     }

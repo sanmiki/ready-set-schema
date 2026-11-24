@@ -11,6 +11,7 @@ import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema
 import { PHONE_ERROR, PHONE_REQUIRED } from "./phone";
 import { LEGAL_CONSENT_REQUIRED, paidServiceConsentError } from "./legal";
 import { recordPaidLegalConsent } from "./legal-consent.server";
+import { saveCheckout, defaultPromotion, promotionChoiceSchema } from "./listing-checkout";
 
 type Status = Database["public"]["Enums"]["product_status"];
 type Ok = Result;
@@ -62,7 +63,7 @@ async function publishThroughFee(
     const consentError = paidServiceConsentError(fee, legalConsent?.accepted ?? false);
     if (consentError) return { ok: false, message: consentError, consentRequired: true, amountTetri: fee };
     const recorded = await recordPaidLegalConsent(client, {
-      context: "listing", contextKey: legalConsent!.key, productId: id, amountTetri: fee,
+      context: "listing", contextKey: legalConsent?.key ?? "", productId: id, amountTetri: fee,
     });
     if (!recorded) return { ok: false, message: TRY_AGAIN };
   }
@@ -126,7 +127,10 @@ export const finalizeListing = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<PublishResult & { pending?: boolean }> => {
     const paths = data.paths.filter((path) => path.length > 0).slice(0, MAX_PHOTOS);
-    if (data.publish && paths.length === 0) return { ok: false, message: "ატვირთეთ ერთი ფოტო მაინც." };
+    if (data.publish && paths.length === 0) {
+      const { count } = await context.supabase.from("product_images").select("id", { count: "exact", head: true }).eq("product_id", data.id);
+      if (!count) return { ok: false, message: "ატვირთეთ ერთი ფოტო მაინც." };
+    }
 
     const owned = await ownedProductId(context.supabase, context.userId, data.id);
     if (!owned) return { ok: false, message: NOT_FOUND };
@@ -143,58 +147,13 @@ export const finalizeListing = createServerFn({ method: "POST" })
 
     if (!data.publish) return { ok: true, id: data.id };
 
-    const promo = data.promo;
-    const wantsPromo = !!promo && (promo.tier !== null || promo.highlight || promo.bump !== "none");
-    if (!wantsPromo) return publishThroughFee(context.supabase, data.id, data.legalConsent);
-
-    // Fee and promotion prices come from the database; publish only if the
-    // verified wallet balance covers both, otherwise keep it as a draft.
-    const [fee, quote, balance] = await Promise.all([
-      context.supabase.rpc("listing_fee_quote"),
-      context.supabase.rpc("promotion_quote", {
-        _tier: promo.tier as string, _days: promo.days, _highlight: promo.highlight, _bump: promo.bump,
-      }),
-      context.supabase.rpc("wallet_balance"),
-    ]);
-    if (fee.error || quote.error || balance.error || quote.data == null || quote.data < 0) {
-      return { ok: false, message: TRY_AGAIN };
-    }
-    const listingFee = fee.data ?? 0;
-    const total = listingFee + quote.data;
-    if ((balance.data ?? 0) < total) {
-      return { ok: true, id: data.id, pending: true };
-    }
-    const consentError = paidServiceConsentError(total, data.legalConsent?.accepted ?? false);
-    if (consentError) return { ok: false, message: consentError, consentRequired: true, amountTetri: total };
-
-    const [listingConsent, promotionConsent] = await Promise.all([
-      recordPaidLegalConsent(context.supabase, {
-        context: "listing", contextKey: data.legalConsent!.key, productId: data.id, amountTetri: total,
-      }),
-      recordPaidLegalConsent(context.supabase, {
-        context: "promotion", contextKey: `new-${data.id}`, productId: data.id, amountTetri: quote.data,
-      }),
-    ]);
-    if (!listingConsent || !promotionConsent) return { ok: false, message: TRY_AGAIN };
-
-    const published = await publishThroughFee(context.supabase, data.id, data.legalConsent, true);
-    if (!published.ok) return published;
-    const { data: bought, error } = await context.supabase.rpc("purchase_promotion", {
-      _product_id: data.id, _tier: promo.tier as string, _days: promo.days,
-      _highlight: promo.highlight, _bump: promo.bump, _key: `new-${data.id}`,
-    });
-    if (error || (bought !== "purchased" && bought !== "duplicate")) {
-      return { ok: false, message: "ნივთი გამოქვეყნდა, მაგრამ პრომო ვერ გააქტიურდა. სცადეთ „ჩემი ნივთებიდან“." };
-    }
-    return { ok: true, id: data.id };
+    const quote = await saveCheckout(context.supabase, data.id, data.promo ?? defaultPromotion);
+    if (!quote) return { ok: false, message: TRY_AGAIN };
+    if (quote.total > 0) return { ok: true, id: data.id, pending: true, amountTetri: quote.total };
+    return publishThroughFee(context.supabase, data.id);
   });
 
-const promoSchema = z.object({
-  tier: z.enum(["vip", "vip_plus", "super_vip"]).nullable(),
-  days: z.union([z.literal(1), z.literal(3), z.literal(7)]),
-  highlight: z.boolean(),
-  bump: z.enum(["none", "once", "daily"]),
-});
+const promoSchema = promotionChoiceSchema;
 
 export const updateListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -281,7 +240,12 @@ export const setListingStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<PublishResult> => {
     const owned = await ownedProductId(context.supabase, context.userId, data.id);
     if (!owned) return { ok: false, message: NOT_FOUND };
-    if (data.status === "active") return publishThroughFee(context.supabase, data.id, data.legalConsent);
+    if (data.status === "active") {
+      const { data: checkout } = await context.supabase.from("listing_checkouts").select("completed").eq("product_id", data.id).maybeSingle();
+      const { data: publication } = await context.supabase.from("listing_publications").select("product_id").eq("product_id", data.id).maybeSingle();
+      if (checkout && !checkout.completed && !publication) return { ok: false, message: "გადახდის გასაგრძელებლად გახსენით განცხადების რედაქტირება." };
+      return publishThroughFee(context.supabase, data.id, data.legalConsent);
+    }
 
     const { error } = await context.supabase
       .from("products")

@@ -19,6 +19,7 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [x] Browser verification: register → publish with photos → catalog → product → edit price → profile save → reserve → publish again → sign out.
 
 ## Open
+- [x] Connect new-listing checkout to one combined sandbox Flitt order; preserve draft selections, retries, and atomic verified activation. Browser-verified approved/declined Flitt payments, mobile selection recovery; rollback-only database scenarios and unit tests passed.
 - [x] Commercial-launch legal pack: five Georgian draft pages, footer links, registration and paid-service consent, versioned acceptance records, and pricing disclosures; no live payments.
 - [ ] Replace marked legal placeholders and obtain Georgian legal review before publication.
 - [x] Make every published listing's designated contact phone automatically public; remove the phone-visibility checkbox while preserving validation and WhatsApp opt-in.

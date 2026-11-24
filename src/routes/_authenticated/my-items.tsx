@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/site/ProductCard";
@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { LegalConsent } from "@/components/site/LegalConsent";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
-import { startCardPayment } from "@/lib/payments.functions";
+import { getListingCheckout, startCardPayment } from "@/lib/payments.functions";
 import { formatTetri } from "@/lib/pricing";
 import { formatPrice, statusLabel } from "@/lib/labels";
 import { myListingsQuery } from "@/lib/queries";
@@ -77,6 +77,7 @@ function MyItemsPage() {
 
 function ItemRow({ listing }: { listing: Listing }) {
   const queryClient = useQueryClient();
+  const checkout = useQuery({ queryKey: ["listing-checkout", listing.id], queryFn: () => getListingCheckout({ data: { productId: listing.id } }), enabled: listing.status === "draft" });
   const [consentOpen, setConsentOpen] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [consentAmount, setConsentAmount] = useState(50);
@@ -146,7 +147,10 @@ function ItemRow({ listing }: { listing: Listing }) {
             რედაქტირება
           </Link>
         </Button>
-        {listing.status !== "active" && (
+        {listing.status === "draft" && !checkout.data?.published && (
+          <Button asChild size="sm" className="rounded-full"><Link to="/sell/$id" params={{ id: listing.id }}>გადახდის გაგრძელება</Link></Button>
+        )}
+        {listing.status !== "active" && (listing.status !== "draft" || checkout.data?.published) && (
           <Button size="sm" variant="outline" className="rounded-full" onClick={() => void changeStatus("active")}>
             გამოქვეყნება
           </Button>

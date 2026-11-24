@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Baby, ImagePlus, Loader2, User, UserRound, Users, X } from "lucide-react";
@@ -20,13 +21,15 @@ import { contactPhoneError, normalizeGeorgianPhone } from "@/lib/phone";
 import { useQuery } from "@tanstack/react-query";
 import { createListing, deleteListing, finalizeListing, setListingImages, updateListing } from "@/lib/seller.functions";
 import type { Category, Listing } from "@/lib/types";
-import { canPayFromBalance, formatTetri } from "@/lib/pricing";
+import { formatTetri } from "@/lib/pricing";
 import { getPromotionPrices } from "@/lib/promotions.functions";
 import { DURATIONS, TIERS, quoteLines, quoteTotal, type BumpMode, type PromotionChoice } from "@/lib/promotions";
 import { cn } from "@/lib/utils";
 import { myWalletQuery } from "@/lib/queries";
 import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
 import { LEGAL_CONSENT_REQUIRED } from "@/lib/legal";
+import { getListingCheckout, prepareListingCheckout, startCardPayment } from "@/lib/payments.functions";
+import { defaultPromotion } from "@/lib/listing-checkout";
 
 const selectClass =
   "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/20";
@@ -76,6 +79,10 @@ export function ListingForm({
   const { user } = useSession();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const startPayment = useServerFn(startCardPayment);
+  const prepareCheckout = useServerFn(prepareListingCheckout);
+  const savedCheckout = useQuery({ queryKey: ["listing-checkout", listing?.id], queryFn: () => getListingCheckout({ data: { productId: listing?.id ?? "" } }), enabled: mode === "edit" && listing?.status === "draft" });
+  const checkoutDraft = mode === "create" || (listing?.status === "draft" && !savedCheckout.data?.published);
 
   const [values, setValues] = useState<FormValues>(() => ({
     title: listing?.title ?? "",
@@ -108,13 +115,20 @@ export function ListingForm({
   const [keptPhotos, setKeptPhotos] = useState<Listing["images"]>(listing?.images ?? []);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [promo, setPromo] = useState<PromotionChoice>({ tier: null, days: 3, highlight: false, bump: "none" });
+  const [promo, setPromo] = useState<PromotionChoice>(defaultPromotion);
   const [legalAccepted, setLegalAccepted] = useState(false);
-  const [consentKey] = useState(() => crypto.randomUUID());
+  const [consentKey, setConsentKey] = useState(() => crypto.randomUUID());
   const { data: walletForConsent } = useQuery(myWalletQuery(user?.id ?? null));
   const { data: pricesForConsent } = useQuery({ queryKey: PRICES_KEY, queryFn: () => getPromotionPrices() });
-  const paidConsentRequired = mode === "create" && ((walletForConsent?.nextFee ?? 0) > 0 || hasPaidPromo(promo));
-  const pricingLoading = mode === "create" && hasPaidPromo(promo) && !pricesForConsent;
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    if (!restored && savedCheckout.isSuccess) {
+      if (savedCheckout.data) setPromo(savedCheckout.data.choice);
+      setRestored(true);
+    }
+  }, [savedCheckout.isSuccess, savedCheckout.data, restored]);
+  const paidConsentRequired = checkoutDraft && ((walletForConsent?.nextFee ?? 0) > 0 || hasPaidPromo(promo));
+  const pricingLoading = checkoutDraft && (!walletForConsent || !pricesForConsent || (mode === "edit" && !restored));
 
   const totalPhotos = keptPhotos.length + newPhotos.length;
   const firstNew = newPhotos[0];
@@ -177,6 +191,8 @@ export function ListingForm({
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    const saveOnly = submitter instanceof HTMLButtonElement && submitter.name === "saveDraft";
     setError(null);
     setPhoneAttempted(true);
 
@@ -211,15 +227,16 @@ export function ListingForm({
       return;
     }
 
-    if (phoneError) {
-      setError(phoneError);
-      toast.error(phoneError);
+    const submitPhoneError = contactPhoneError(phoneValue, publishing || (checkoutDraft && !saveOnly));
+    if (submitPhoneError) {
+      setError(submitPhoneError);
+      toast.error(submitPhoneError);
       document.getElementById("phone")?.scrollIntoView({ behavior: "smooth", block: "center" });
       document.getElementById("phone")?.focus({ preventScroll: true });
       return;
     }
 
-    if (paidConsentRequired && !legalAccepted) {
+    if (!saveOnly && paidConsentRequired && !legalAccepted) {
       setError(LEGAL_CONSENT_REQUIRED);
       toast.error(LEGAL_CONSENT_REQUIRED);
       document.getElementById("sec-summary")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -270,7 +287,10 @@ export function ListingForm({
 
         await queryClient.invalidateQueries();
         if ("pending" in published && published.pending) {
-          toast.message("ნივთი შენახულია მონახაზად — გადახდის მოლოდინში. ონლაინ გადახდა მალე დაემატება.");
+          if (!legalAccepted) { toast.error(LEGAL_CONSENT_REQUIRED); navigate({ to: "/sell/$id", params: { id: created.id } }); return; }
+          const payment = await startPayment({ data: { service: "listing", productId: created.id, legalConsent: { accepted: true, key: consentKey } } });
+          if (payment.ok) { window.location.assign(payment.url); return; }
+          toast.error(payment.message);
           navigate({ to: "/my-items" });
           return;
         }
@@ -316,9 +336,31 @@ export function ListingForm({
         return;
       }
 
+      if (checkoutDraft) {
+        const quote = await prepareCheckout({ data: { productId: listing.id, choice: promo } });
+        if (!quote) { setError("გადახდის მომზადება ვერ მოხერხდა."); return; }
+        if (!saveOnly) {
+          if (quote.total > 0) {
+            if (!legalAccepted) { setError(LEGAL_CONSENT_REQUIRED); await queryClient.invalidateQueries(); return; }
+            const payment = await startPayment({ data: { service: "listing", productId: listing.id, legalConsent: { accepted: true, key: consentKey } } });
+            if (!payment.ok) { setError(payment.message); return; }
+            window.location.assign(payment.url);
+            return;
+          }
+          const published = await finalizeListing({ data: { id: listing.id, paths: [], publish: true, promo } });
+          if (!published.ok) { setError(published.message); return; }
+          if (published.pending) { setError(LEGAL_CONSENT_REQUIRED); await queryClient.invalidateQueries(); return; }
+        }
+        await queryClient.invalidateQueries();
+        navigate({ to: "/my-items" });
+        return;
+      }
       await queryClient.invalidateQueries();
       toast.success("ცვლილებები შენახულია");
       navigate({ to: "/product/$id", params: { id: listing.id } });
+    } catch {
+      toast.error("ოპერაცია ვერ მოხერხდა. შენახული მონახაზი იხილეთ „ჩემ ნივთებში“.");
+      navigate({ to: "/my-items" });
     } finally {
       setBusy(false);
     }
@@ -328,7 +370,7 @@ export function ListingForm({
     <form onSubmit={handleSubmit} noValidate className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[200px_minmax(0,1fr)_300px] xl:gap-8">
       <nav aria-label="ფორმის ნაწილები" className="hidden xl:block">
         <ol className="sticky top-24 space-y-0.5 border-l border-border text-sm">
-          {SECTIONS.filter((section) => mode === "create" || !["sec-promo", "sec-summary"].includes(section.id)).map((section) => (
+          {SECTIONS.filter((section) => checkoutDraft || !["sec-promo", "sec-summary"].includes(section.id)).map((section) => (
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
@@ -613,8 +655,8 @@ export function ListingForm({
         </div>
       </Section>
 
-      {mode === "create" && <PromoSection choice={promo} onChange={setPromo} />}
-      {mode === "create" && <PriceSummary choice={promo} accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />}
+      {checkoutDraft && <PromoSection choice={promo} onChange={(choice) => { setPromo(choice); setLegalAccepted(false); setConsentKey(crypto.randomUUID()); }} />}
+      {checkoutDraft && <PriceSummary choice={promo} accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />}
 
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -625,8 +667,9 @@ export function ListingForm({
       <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-border bg-background/90 px-4 py-3 backdrop-blur-md sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
         <Button type="submit" size="lg" className="h-12 flex-1 rounded-full px-8 sm:flex-none" disabled={busy || pricingLoading || (paidConsentRequired && !legalAccepted)}>
           {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}
-          {mode === "create" ? "გამოქვეყნება" : "ცვლილებების შენახვა"}
+          {checkoutDraft ? (paidConsentRequired ? "გადახდა და გამოქვეყნება" : "გამოქვეყნება") : "ცვლილებების შენახვა"}
         </Button>
+        {mode === "edit" && checkoutDraft && <Button type="submit" name="saveDraft" variant="outline" disabled={busy || pricingLoading} className="rounded-full">მონახაზის შენახვა</Button>}
         <Button
           type="button"
           variant="ghost"
@@ -785,7 +828,7 @@ function PriceSummary({ choice, accepted, onAcceptedChange }: { choice: Promotio
   const promoTotal = prices ? quoteTotal(prices, choice) : 0;
   const total = fee + promoTotal;
   const paid = total > 0;
-  const enough = wallet ? canPayFromBalance(wallet.balance, total) : false;
+
 
   return (
     <Section id="sec-summary" title="ჯამი">
@@ -810,14 +853,7 @@ function PriceSummary({ choice, accepted, onAcceptedChange }: { choice: Promotio
       {fee === 0 && !hasPaidPromo(choice) && (
         <p className="mt-3 rounded-xl bg-sage-soft px-4 py-2.5 text-sm text-sage-deep">პირველი განცხადება უფასოა</p>
       )}
-      {paid && wallet && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          ბალანსი: {formatTetri(wallet.balance)}.{" "}
-          {enough
-            ? "თანხა ბალანსიდან ჩამოიჭრება გამოქვეყნებისას."
-            : "ბალანსი არასაკმარისია — ნივთი მონახაზად შეინახება გადახდამდე. ონლაინ გადახდა მალე დაემატება."}
-        </p>
-      )}
+      {paid && <p className="mt-3 text-xs text-muted-foreground">ბარათით გადახდა · Flitt-ის სატესტო რეჟიმი</p>}
       {paid && (
         <div className="mt-4">
           <LegalConsent

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { LEGAL_CONSENT_REQUIRED } from "./legal";
 import { recordPaidLegalConsent } from "./legal-consent.server";
+import { defaultPromotion, promotionChoiceSchema, saveCheckout } from "./listing-checkout";
 
 const startSchema = z.object({
   service: z.enum(["listing", "promotion"]),
@@ -33,34 +34,44 @@ export const startCardPayment = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true; url: string } | { ok: false; message: string }> => {
     const { flittConfig, createFlittCheckout } = await import("./flitt.server");
     const cfg = flittConfig();
-    if (cfg.environment !== "sandbox") return { ok: false, message: START_ERRORS["disabled"]! };
+    if (cfg.environment !== "sandbox") return { ok: false, message: START_ERRORS["disabled"] ?? "გადახდა გამორთულია." };
     const db = context.supabase;
 
     // Price comes from the database, never from the browser.
     let amount: number;
+    let promotionAmount = 0;
     if (data.service === "promotion") {
       const { data: q } = await db.rpc("promotion_quote", { _tier: data.tier as string, _days: data.days, _highlight: data.highlight, _bump: data.bump });
-      if (!q || q <= 0) return { ok: false, message: START_ERRORS["invalid"]! };
+      if (!q || q <= 0) return { ok: false, message: START_ERRORS["invalid"] ?? "აირჩიეთ სერვისი." };
       amount = q;
     } else {
-      const { data: fee } = await db.rpc("listing_fee_quote");
-      if (!fee || fee <= 0) return { ok: false, message: START_ERRORS["free"]! };
-      amount = fee;
+      const { data: saved } = await db.from("listing_checkouts").select("tier,days,highlight,bump").eq("product_id", data.productId).maybeSingle();
+      const choice = saved ? promotionChoiceSchema.parse(saved) : defaultPromotion;
+      const quote = await saveCheckout(db, data.productId, choice);
+      if (!quote) return { ok: false, message: "განცხადების ფასის გამოთვლა ვერ მოხერხდა." };
+      if (quote.total <= 0) return { ok: false, message: START_ERRORS["free"] ?? "გამოქვეყნება უფასოა." };
+      amount = quote.total;
+      promotionAmount = quote.promotion;
     }
     const consentOk = await recordPaidLegalConsent(db, {
       context: data.service, contextKey: data.legalConsent.key, productId: data.productId, amountTetri: amount,
     });
+    if (data.service === "listing" && promotionAmount > 0) {
+      const promotionConsent = await recordPaidLegalConsent(db, { context: "promotion", contextKey: data.legalConsent.key, productId: data.productId, amountTetri: promotionAmount });
+      if (!promotionConsent) return { ok: false, message: "თანხმობის შენახვა ვერ მოხერხდა." };
+    }
     if (!consentOk) return { ok: false, message: "თანხმობის შენახვა ვერ მოხერხდა. სცადეთ თავიდან." };
 
     const { data: created, error } = await db.rpc("create_payment_order", {
       _service: data.service, _product_id: data.productId, _tier: data.tier as string, _days: data.days,
       _highlight: data.highlight, _bump: data.bump, _consent_key: data.legalConsent.key, _environment: cfg.environment,
     });
-    const res = created as { id?: string; amount?: number; error?: string } | null;
+    const res = created as { id?: string; amount?: number; error?: string; url?: string } | null;
     if (error || !res?.id || !res.amount) {
       if (error) console.error("create_payment_order", error.message);
       return { ok: false, message: START_ERRORS[res?.error ?? ""] ?? "გადახდის დაწყება ვერ მოხერხდა." };
     }
+    if (res.url?.startsWith("https://pay.flitt.com/")) return { ok: true, url: res.url };
     const origin = new URL(getRequest().url).origin;
     try {
       const url = await createFlittCheckout({
@@ -70,6 +81,10 @@ export const startCardPayment = createServerFn({ method: "POST" })
         responseUrl: `${origin}/api/public/flitt-return?pid=${res.id}`,
         callbackUrl: `${origin}/api/public/flitt-callback`,
       });
+      // The order above was authorized and priced as the current owner. Only the server writes the provider URL.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error: urlError } = await supabaseAdmin.from("payments").update({ checkout_url: url }).eq("id", res.id).eq("user_id", context.userId).eq("status", "pending");
+      if (urlError) throw new Error("checkout_url_save_failed");
       return { ok: true, url };
     } catch {
       await db.rpc("cancel_payment_order", { _payment_id: res.id });
@@ -129,3 +144,20 @@ export const adminPayments = createServerFn({ method: "GET" })
     if (error) throw new Error("forbidden");
     return data as unknown as AdminPayments;
   });
+
+export const getListingCheckout = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { productId: string }) => z.object({ productId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const [checkout, publication] = await Promise.all([
+      context.supabase.from("listing_checkouts").select("tier,days,highlight,bump,payment_id,completed").eq("product_id", data.productId).maybeSingle(),
+      context.supabase.from("listing_publications").select("product_id").eq("product_id", data.productId).maybeSingle(),
+    ]);
+    if (checkout.error || publication.error) throw new Error("checkout_read_failed");
+    return { choice: checkout.data ? promotionChoiceSchema.parse(checkout.data) : defaultPromotion, paymentId: checkout.data?.payment_id ?? null, completed: checkout.data?.completed ?? false, published: !!publication.data };
+  });
+
+export const prepareListingCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { productId: string; choice: z.input<typeof promotionChoiceSchema> }) => z.object({ productId: z.string().uuid(), choice: promotionChoiceSchema }).parse(i))
+  .handler(async ({ data, context }) => saveCheckout(context.supabase, data.productId, data.choice));
