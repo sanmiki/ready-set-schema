@@ -416,39 +416,113 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          order_status: string | null
+          outcome: string
+          payment_id: string | null
+          signature_valid: boolean | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          order_status?: string | null
+          outcome: string
+          payment_id?: string | null
+          signature_valid?: boolean | null
+          source: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          order_status?: string | null
+          outcome?: string
+          payment_id?: string | null
+          signature_valid?: boolean | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
+          activation_result: string | null
           amount_tetri: number
+          confirmed_at: string | null
+          consent_key: string | null
           created_at: string
+          currency: string
+          environment: string
+          failure_reason: string | null
           id: string
           product_id: string | null
           provider: string | null
+          provider_payment_id: string | null
           provider_ref: string | null
           purpose: Database["public"]["Enums"]["payment_purpose"]
+          refund_status: string
+          refunded_tetri: number
+          service: string | null
+          service_params: Json
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
           user_id: string
         }
         Insert: {
+          activation_result?: string | null
           amount_tetri: number
+          confirmed_at?: string | null
+          consent_key?: string | null
           created_at?: string
+          currency?: string
+          environment?: string
+          failure_reason?: string | null
           id?: string
           product_id?: string | null
           provider?: string | null
+          provider_payment_id?: string | null
           provider_ref?: string | null
           purpose: Database["public"]["Enums"]["payment_purpose"]
+          refund_status?: string
+          refunded_tetri?: number
+          service?: string | null
+          service_params?: Json
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
           user_id: string
         }
         Update: {
+          activation_result?: string | null
           amount_tetri?: number
+          confirmed_at?: string | null
+          consent_key?: string | null
           created_at?: string
+          currency?: string
+          environment?: string
+          failure_reason?: string | null
           id?: string
           product_id?: string | null
           provider?: string | null
+          provider_payment_id?: string | null
           provider_ref?: string | null
           purpose?: Database["public"]["Enums"]["payment_purpose"]
+          refund_status?: string
+          refunded_tetri?: number
+          service?: string | null
+          service_params?: Json
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
           user_id?: string
@@ -836,6 +910,7 @@ export type Database = {
         Args: { _action: string; _product_id: string; _reason: string }
         Returns: string
       }
+      admin_payments: { Args: { _limit: number }; Returns: Json }
       admin_promotions: {
         Args: { _limit: number; _offset: number }
         Returns: {
@@ -908,6 +983,32 @@ export type Database = {
           total: number
           username: string
         }[]
+      }
+      cancel_payment_order: { Args: { _payment_id: string }; Returns: string }
+      complete_payment_order: {
+        Args: {
+          _amount: number
+          _currency: string
+          _details: Json
+          _order_status: string
+          _payment_id: string
+          _provider_payment_id: string
+          _source: string
+        }
+        Returns: string
+      }
+      create_payment_order: {
+        Args: {
+          _bump: string
+          _consent_key: string
+          _days: number
+          _environment: string
+          _highlight: boolean
+          _product_id: string
+          _service: string
+          _tier: string
+        }
+        Returns: Json
       }
       has_role: {
         Args: {

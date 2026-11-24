@@ -38,6 +38,8 @@ import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedPromoteIdRouteImport } from './routes/_authenticated/promote.$id'
 import { Route as AuthenticatedSellIdRouteImport } from './routes/_authenticated/sell_.$id'
+import { Route as ApiPublicFlittCallbackRouteImport } from './routes/api/public/flitt-callback'
+import { Route as ApiPublicFlittReturnRouteImport } from './routes/api/public/flitt-return'
 import { Route as ApiPublicMediaRouteImport } from './routes/api/public/media'
 
 const IndexRoute = IndexRouteImport.update({
@@ -189,6 +191,16 @@ const AuthenticatedSellIdRoute = AuthenticatedSellIdRouteImport.update({
   path: '/sell/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicFlittCallbackRoute = ApiPublicFlittCallbackRouteImport.update({
+  id: '/api/public/flitt-callback',
+  path: '/api/public/flitt-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFlittReturnRoute = ApiPublicFlittReturnRouteImport.update({
+  id: '/api/public/flitt-return',
+  path: '/api/public/flitt-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMediaRoute = ApiPublicMediaRouteImport.update({
   id: '/api/public/media',
   path: '/api/public/media',
@@ -223,6 +235,8 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
+  '/api/public/flitt-callback': typeof ApiPublicFlittCallbackRoute
+  '/api/public/flitt-return': typeof ApiPublicFlittReturnRoute
   '/api/public/media': typeof ApiPublicMediaRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -253,6 +267,8 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/sell/$id': typeof AuthenticatedSellIdRoute
+  '/api/public/flitt-callback': typeof ApiPublicFlittCallbackRoute
+  '/api/public/flitt-return': typeof ApiPublicFlittReturnRoute
   '/api/public/media': typeof ApiPublicMediaRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -286,6 +302,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/promote/$id': typeof AuthenticatedPromoteIdRoute
   '/_authenticated/sell_/$id': typeof AuthenticatedSellIdRoute
+  '/api/public/flitt-callback': typeof ApiPublicFlittCallbackRoute
+  '/api/public/flitt-return': typeof ApiPublicFlittReturnRoute
   '/api/public/media': typeof ApiPublicMediaRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -319,6 +337,8 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/promote/$id'
     | '/sell/$id'
+    | '/api/public/flitt-callback'
+    | '/api/public/flitt-return'
     | '/api/public/media'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -349,6 +369,8 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/promote/$id'
     | '/sell/$id'
+    | '/api/public/flitt-callback'
+    | '/api/public/flitt-return'
     | '/api/public/media'
     | '/admin'
   id:
@@ -381,6 +403,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/promote/$id'
     | '/_authenticated/sell_/$id'
+    | '/api/public/flitt-callback'
+    | '/api/public/flitt-return'
     | '/api/public/media'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -398,6 +422,8 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicFlittCallbackRoute: typeof ApiPublicFlittCallbackRoute
+  ApiPublicFlittReturnRoute: typeof ApiPublicFlittReturnRoute
   ApiPublicMediaRoute: typeof ApiPublicMediaRoute
 }
 
@@ -606,6 +632,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSellIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/flitt-callback': {
+      id: '/api/public/flitt-callback'
+      path: '/api/public/flitt-callback'
+      fullPath: '/api/public/flitt-callback'
+      preLoaderRoute: typeof ApiPublicFlittCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/flitt-return': {
+      id: '/api/public/flitt-return'
+      path: '/api/public/flitt-return'
+      fullPath: '/api/public/flitt-return'
+      preLoaderRoute: typeof ApiPublicFlittReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/media': {
       id: '/api/public/media'
       path: '/api/public/media'
@@ -684,6 +724,8 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicFlittCallbackRoute: ApiPublicFlittCallbackRoute,
+  ApiPublicFlittReturnRoute: ApiPublicFlittReturnRoute,
   ApiPublicMediaRoute: ApiPublicMediaRoute,
 }
 export const routeTree = rootRouteImport

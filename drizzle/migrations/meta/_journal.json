@@ -162,6 +162,13 @@
       "when": 1795529285943,
       "tag": "0022_restrict_promotion_price_table_access",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795544380325,
+      "tag": "0023_flitt_test_card_payments",
+      "breakpoints": true
     }
   ]
 }
