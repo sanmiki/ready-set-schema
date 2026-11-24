@@ -19,6 +19,8 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [x] Browser verification: register → publish with photos → catalog → product → edit price → profile save → reserve → publish again → sign out.
 
 ## Open
+- [x] Commercial-launch legal pack: five Georgian draft pages, footer links, registration and paid-service consent, versioned acceptance records, and pricing disclosures; no live payments.
+- [ ] Replace marked legal placeholders and obtain Georgian legal review before publication.
 - [x] Make every published listing's designated contact phone automatically public; remove the phone-visibility checkbox while preserving validation and WhatsApp opt-in.
 - [x] Require a valid Georgian contact phone when publishing; allow phone-free drafts and prefill from the seller profile without overwriting it.
 - [x] Secure persistent messaging, product contact button, realtime inbox and unread navigation indicators.
@@ -28,7 +30,7 @@ Source brief: `user-uploads://Continue_building_my_existing_ReWear_second-hand_p
 - [x] Persistent favorites (hearts, /favorites page, owner-only access)
 - [x] Seller phone contact (automatic public number and direct call on live listings), approximate location; WhatsApp remains opt-in
 - [x] Listing fee (first free, then 0.50 ₾ from balance), wallet page, ledger, publish guard
-- [ ] Card payments + balance top-ups — blocked: no bank (TBC/BoG) merchant contract/credentials yet
+- [ ] Flitt card payments + balance top-ups — blocked: legal review, real business/contact details, merchant approval and credentials are still needed; no live payments enabled
 - [x] Promotion packages (VIP / VIP+ / SUPER VIP), highlight, bump — wallet only; card payment waits on a bank contract
 
 ## Admin dashboard

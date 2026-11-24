@@ -9,9 +9,15 @@ import { BUCKET, MAX_PHOTOS } from "./media";
 import type { Listing, Profile, Result } from "./types";
 import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema, profileFieldsSchema } from "./validation";
 import { PHONE_ERROR, PHONE_REQUIRED } from "./phone";
+import { LEGAL_CONSENT_REQUIRED, paidServiceConsentError } from "./legal";
+import { recordPaidLegalConsent } from "./legal-consent.server";
 
 type Status = Database["public"]["Enums"]["product_status"];
 type Ok = Result;
+type LegalConsentInput = { accepted: boolean; key: string };
+type PublishResult = Result & { consentRequired?: boolean; amountTetri?: number };
+
+const legalConsentSchema = z.object({ accepted: z.boolean(), key: z.string().min(8).max(100) });
 
 const NOT_FOUND = "ეს ნივთი ვერ მოიძებნა.";
 export const INSUFFICIENT_BALANCE =
@@ -39,11 +45,33 @@ async function ownedProductId(
 }
 
 // Pricing, balance and publication are decided by the database function, never the client.
-async function publishThroughFee(client: Parameters<typeof hydrateListings>[0], id: string): Promise<Ok> {
+async function publishThroughFee(
+  client: Parameters<typeof hydrateListings>[0],
+  id: string,
+  legalConsent?: LegalConsentInput | null,
+  consentRecorded = false,
+): Promise<PublishResult> {
+  const [publication, feeQuote] = await Promise.all([
+    client.from("listing_publications").select("product_id").eq("product_id", id).maybeSingle(),
+    client.rpc("listing_fee_quote"),
+  ]);
+  if (publication.error || feeQuote.error) return { ok: false, message: TRY_AGAIN };
+  const fee = publication.data ? 0 : (feeQuote.data ?? 0);
+
+  if (fee > 0 && !consentRecorded) {
+    const consentError = paidServiceConsentError(fee, legalConsent?.accepted ?? false);
+    if (consentError) return { ok: false, message: consentError, consentRequired: true, amountTetri: fee };
+    const recorded = await recordPaidLegalConsent(client, {
+      context: "listing", contextKey: legalConsent!.key, productId: id, amountTetri: fee,
+    });
+    if (!recorded) return { ok: false, message: TRY_AGAIN };
+  }
+
   const { data, error } = await client.rpc("publish_listing", { _product_id: id });
   if (error) return { ok: false, message: TRY_AGAIN };
   if (data === "phone_required") return { ok: false, message: PHONE_REQUIRED };
   if (data === "phone_invalid") return { ok: false, message: PHONE_ERROR };
+  if (data === "consent_required") return { ok: false, message: LEGAL_CONSENT_REQUIRED, consentRequired: true, amountTetri: fee };
   if (data === "insufficient_balance") return { ok: false, message: INSUFFICIENT_BALANCE };
   if (data !== "published") return { ok: false, message: NOT_FOUND };
   return { ok: true, id };
@@ -90,12 +118,13 @@ export const createListing = createServerFn({ method: "POST" })
 export const finalizeListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: { id: string; paths: string[]; publish: boolean; promo?: z.input<typeof promoSchema> | null }) => ({
+    (input: { id: string; paths: string[]; publish: boolean; promo?: z.input<typeof promoSchema> | null; legalConsent?: LegalConsentInput | null }) => ({
       ...input,
       promo: input.promo ? promoSchema.parse(input.promo) : null,
+      legalConsent: input.legalConsent ? legalConsentSchema.parse(input.legalConsent) : null,
     }),
   )
-  .handler(async ({ data, context }): Promise<Ok & { pending?: boolean }> => {
+  .handler(async ({ data, context }): Promise<PublishResult & { pending?: boolean }> => {
     const paths = data.paths.filter((path) => path.length > 0).slice(0, MAX_PHOTOS);
     if (data.publish && paths.length === 0) return { ok: false, message: "ატვირთეთ ერთი ფოტო მაინც." };
 
@@ -116,7 +145,7 @@ export const finalizeListing = createServerFn({ method: "POST" })
 
     const promo = data.promo;
     const wantsPromo = !!promo && (promo.tier !== null || promo.highlight || promo.bump !== "none");
-    if (!wantsPromo) return publishThroughFee(context.supabase, data.id);
+    if (!wantsPromo) return publishThroughFee(context.supabase, data.id, data.legalConsent);
 
     // Fee and promotion prices come from the database; publish only if the
     // verified wallet balance covers both, otherwise keep it as a draft.
@@ -130,10 +159,25 @@ export const finalizeListing = createServerFn({ method: "POST" })
     if (fee.error || quote.error || balance.error || quote.data == null || quote.data < 0) {
       return { ok: false, message: TRY_AGAIN };
     }
-    if ((balance.data ?? 0) < (fee.data ?? 0) + quote.data) {
+    const listingFee = fee.data ?? 0;
+    const total = listingFee + quote.data;
+    if ((balance.data ?? 0) < total) {
       return { ok: true, id: data.id, pending: true };
     }
-    const published = await publishThroughFee(context.supabase, data.id);
+    const consentError = paidServiceConsentError(total, data.legalConsent?.accepted ?? false);
+    if (consentError) return { ok: false, message: consentError, consentRequired: true, amountTetri: total };
+
+    const [listingConsent, promotionConsent] = await Promise.all([
+      recordPaidLegalConsent(context.supabase, {
+        context: "listing", contextKey: data.legalConsent!.key, productId: data.id, amountTetri: total,
+      }),
+      recordPaidLegalConsent(context.supabase, {
+        context: "promotion", contextKey: `new-${data.id}`, productId: data.id, amountTetri: quote.data,
+      }),
+    ]);
+    if (!listingConsent || !promotionConsent) return { ok: false, message: TRY_AGAIN };
+
+    const published = await publishThroughFee(context.supabase, data.id, data.legalConsent, true);
     if (!published.ok) return published;
     const { data: bought, error } = await context.supabase.rpc("purchase_promotion", {
       _product_id: data.id, _tier: promo.tier as string, _days: promo.days,
@@ -230,11 +274,14 @@ export const setListingImages = createServerFn({ method: "POST" })
 
 export const setListingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; status: Status }) => input)
-  .handler(async ({ data, context }): Promise<Ok> => {
+  .inputValidator((input: { id: string; status: Status; legalConsent?: LegalConsentInput | null }) => ({
+    ...input,
+    legalConsent: input.legalConsent ? legalConsentSchema.parse(input.legalConsent) : null,
+  }))
+  .handler(async ({ data, context }): Promise<PublishResult> => {
     const owned = await ownedProductId(context.supabase, context.userId, data.id);
     if (!owned) return { ok: false, message: NOT_FOUND };
-    if (data.status === "active") return publishThroughFee(context.supabase, data.id);
+    if (data.status === "active") return publishThroughFee(context.supabase, data.id, data.legalConsent);
 
     const { error } = await context.supabase
       .from("products")

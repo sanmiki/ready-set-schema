@@ -25,6 +25,11 @@ describe("App routing", () => {
     "/my-items",
     "/profile",
     "/messages",
+    "/terms",
+    "/privacy",
+    "/refunds",
+    "/listing-rules",
+    "/contact",
   ])("matches a page for %s instead of falling back to not found", (path) => {
     expect(lastMatch(path)).not.toBe(rootRouteId);
   });

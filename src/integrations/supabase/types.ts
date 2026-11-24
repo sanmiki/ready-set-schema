@@ -184,6 +184,42 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          amount_tetri: number | null
+          context: string
+          context_key: string
+          created_at: string
+          document_key: string
+          document_version: string
+          id: string
+          product_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_tetri?: number | null
+          context: string
+          context_key: string
+          created_at?: string
+          document_key: string
+          document_version: string
+          id?: string
+          product_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_tetri?: number | null
+          context?: string
+          context_key?: string
+          created_at?: string
+          document_key?: string
+          document_version?: string
+          id?: string
+          product_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       listing_contacts: {
         Row: {
           is_public: boolean
@@ -940,6 +976,15 @@ export type Database = {
           _tier: string
         }
         Returns: string
+      }
+      record_legal_acceptance: {
+        Args: {
+          _amount_tetri?: number
+          _context: string
+          _context_key: string
+          _product_id?: string
+        }
+        Returns: undefined
       }
       require_admin: { Args: never; Returns: string }
       start_conversation: { Args: { _product_id: string }; Returns: string }

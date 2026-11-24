@@ -14,7 +14,12 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AccessDeniedRouteImport } from './routes/access-denied'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CatalogRouteImport } from './routes/catalog'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ListingRulesRouteImport } from './routes/listing-rules'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundsRouteImport } from './routes/refunds'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedFavoritesRouteImport } from './routes/_authenticated/favorites'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
@@ -59,9 +64,34 @@ const CatalogRoute = CatalogRouteImport.update({
   path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListingRulesRoute = ListingRulesRouteImport.update({
+  id: '/listing-rules',
+  path: '/listing-rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundsRoute = RefundsRouteImport.update({
+  id: '/refunds',
+  path: '/refunds',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
@@ -170,7 +200,12 @@ export interface FileRoutesByFullPath {
   '/access-denied': typeof AccessDeniedRoute
   '/auth': typeof AuthRoute
   '/catalog': typeof CatalogRoute
+  '/contact': typeof ContactRoute
+  '/listing-rules': typeof ListingRulesRoute
+  '/privacy': typeof PrivacyRoute
+  '/refunds': typeof RefundsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/favorites': typeof AuthenticatedFavoritesRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -196,7 +231,12 @@ export interface FileRoutesByTo {
   '/access-denied': typeof AccessDeniedRoute
   '/auth': typeof AuthRoute
   '/catalog': typeof CatalogRoute
+  '/contact': typeof ContactRoute
+  '/listing-rules': typeof ListingRulesRoute
+  '/privacy': typeof PrivacyRoute
+  '/refunds': typeof RefundsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/favorites': typeof AuthenticatedFavoritesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/my-items': typeof AuthenticatedMyItemsRoute
@@ -223,7 +263,12 @@ export interface FileRoutesById {
   '/access-denied': typeof AccessDeniedRoute
   '/auth': typeof AuthRoute
   '/catalog': typeof CatalogRoute
+  '/contact': typeof ContactRoute
+  '/listing-rules': typeof ListingRulesRoute
+  '/privacy': typeof PrivacyRoute
+  '/refunds': typeof RefundsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/favorites': typeof AuthenticatedFavoritesRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
@@ -251,7 +296,12 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/auth'
     | '/catalog'
+    | '/contact'
+    | '/listing-rules'
+    | '/privacy'
+    | '/refunds'
     | '/reset-password'
+    | '/terms'
     | '/admin'
     | '/favorites'
     | '/messages'
@@ -277,7 +327,12 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/auth'
     | '/catalog'
+    | '/contact'
+    | '/listing-rules'
+    | '/privacy'
+    | '/refunds'
     | '/reset-password'
+    | '/terms'
     | '/favorites'
     | '/messages'
     | '/my-items'
@@ -303,7 +358,12 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/auth'
     | '/catalog'
+    | '/contact'
+    | '/listing-rules'
+    | '/privacy'
+    | '/refunds'
     | '/reset-password'
+    | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/favorites'
     | '/_authenticated/messages'
@@ -331,7 +391,12 @@ export interface RootRouteChildren {
   AccessDeniedRoute: typeof AccessDeniedRoute
   AuthRoute: typeof AuthRoute
   CatalogRoute: typeof CatalogRoute
+  ContactRoute: typeof ContactRoute
+  ListingRulesRoute: typeof ListingRulesRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundsRoute: typeof RefundsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TermsRoute: typeof TermsRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicMediaRoute: typeof ApiPublicMediaRoute
 }
@@ -373,11 +438,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listing-rules': {
+      id: '/listing-rules'
+      path: '/listing-rules'
+      fullPath: '/listing-rules'
+      preLoaderRoute: typeof ListingRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refunds': {
+      id: '/refunds'
+      path: '/refunds'
+      fullPath: '/refunds'
+      preLoaderRoute: typeof RefundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -577,7 +677,12 @@ const rootRouteChildren: RootRouteChildren = {
   AccessDeniedRoute: AccessDeniedRoute,
   AuthRoute: AuthRoute,
   CatalogRoute: CatalogRoute,
+  ContactRoute: ContactRoute,
+  ListingRulesRoute: ListingRulesRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundsRoute: RefundsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TermsRoute: TermsRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicMediaRoute: ApiPublicMediaRoute,
 }

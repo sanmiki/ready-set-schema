@@ -5,6 +5,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 import type { Client } from "./db";
 import type { PromotionPrices } from "./promotions";
+import { LEGAL_CONSENT_REQUIRED, paidServiceConsentError } from "./legal";
+import { recordPaidLegalConsent } from "./legal-consent.server";
 
 async function readPrices(client: Client): Promise<PromotionPrices> {
   const { data, error } = await client.from("promotion_prices").select("code,tetri");
@@ -51,18 +53,31 @@ const purchaseSchema = z.object({
   highlight: z.boolean(),
   bump: z.enum(["none", "once", "daily"]),
   key: z.string().min(8).max(100),
+  legalConsent: z.object({ accepted: z.boolean(), key: z.string().min(8).max(100) }),
 });
 
 const MESSAGES: Record<string, string> = {
   insufficient_balance: "ბალანსი არასაკმარისია. ონლაინ გადახდა მალე დაემატება.",
   not_found: "პრომო მხოლოდ თქვენს გამოქვეყნებულ ნივთზეა შესაძლებელი.",
   invalid: "აირჩიეთ ერთი სერვისი მაინც.",
+  consent_required: LEGAL_CONSENT_REQUIRED,
 };
 
 export const purchasePromotion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: z.input<typeof purchaseSchema>) => purchaseSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ ok: true } | { ok: false; message: string }> => {
+    const { data: quoted, error: quoteError } = await context.supabase.rpc("promotion_quote", {
+      _tier: data.tier as string, _days: data.days, _highlight: data.highlight, _bump: data.bump,
+    });
+    if (quoteError || quoted == null || quoted <= 0) return { ok: false, message: MESSAGES["invalid"]! };
+    const consentError = paidServiceConsentError(quoted, data.legalConsent.accepted);
+    if (consentError) return { ok: false, message: consentError };
+    const recorded = await recordPaidLegalConsent(context.supabase, {
+      context: "promotion", contextKey: data.key, productId: data.productId, amountTetri: quoted,
+    });
+    if (!recorded) return { ok: false, message: "ოპერაცია ვერ მოხერხდა. სცადეთ თავიდან." };
+
     const { data: result, error } = await context.supabase.rpc("purchase_promotion", {
       _product_id: data.productId,
       _tier: data.tier as string,

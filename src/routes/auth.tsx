@@ -10,6 +10,8 @@ import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { firstMessage, signInSchema, signUpSchema } from "@/lib/validation";
+import { LegalConsent } from "@/components/site/LegalConsent";
+import { clearPendingRegistrationConsent, prepareRegistrationConsent } from "@/components/site/LegalConsentCapture";
 
 type AuthSearch = {
   mode?: "signin" | "signup" | undefined;
@@ -70,6 +72,7 @@ function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [legalAccepted, setLegalAccepted] = useState(false);
 
   function finish() {
     const product = /^\/product\/([0-9a-f-]{36})$/i.exec(search.redirect ?? "");
@@ -99,10 +102,15 @@ function AuthPage() {
       setError(message);
       return;
     }
+    if (mode === "signup" && !legalAccepted) {
+      setError("რეგისტრაციისთვის დაგვიდასტურეთ, რომ ეთანხმებით მონახაზ დოკუმენტებს.");
+      return;
+    }
 
     setBusy(true);
     try {
       if (mode === "signin") {
+        clearPendingRegistrationConsent();
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: parsed.data.email,
           password: parsed.data.password,
@@ -115,6 +123,7 @@ function AuthPage() {
         return;
       }
 
+      prepareRegistrationConsent();
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
@@ -128,6 +137,7 @@ function AuthPage() {
       });
 
       if (signUpError) {
+        clearPendingRegistrationConsent();
         setError(translateAuthError(signUpError.message));
         return;
       }
@@ -144,10 +154,20 @@ function AuthPage() {
 
   async function handleOAuth(provider: "google" | "lovable") {
     setError(null);
+    if (mode === "signup") {
+      if (!legalAccepted) {
+        setError("რეგისტრაციისთვის დაგვიდასტურეთ, რომ ეთანხმებით მონახაზ დოკუმენტებს.");
+        return;
+      }
+      prepareRegistrationConsent();
+    } else {
+      clearPendingRegistrationConsent();
+    }
     const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
+      if (mode === "signup") clearPendingRegistrationConsent();
       setError(translateAuthError(result.error.message));
       return;
     }
@@ -179,12 +199,25 @@ function AuthPage() {
             : "შექმენით ანგარიში — უფასოა."}
         </p>
 
+        {mode === "signup" && (
+          <div className="mt-5">
+            <LegalConsent
+              id="registration-legal-consent"
+              checked={legalAccepted}
+              onChange={setLegalAccepted}
+              kind="registration"
+              disabled={busy}
+            />
+          </div>
+        )}
+
         <div className="mt-6 space-y-3">
           <Button
             type="button"
             variant="outline"
             className="h-11 w-full rounded-full text-sm font-medium"
             style={providerButtonStyle}
+            disabled={busy || (mode === "signup" && !legalAccepted)}
             onClick={() => void handleOAuth("google")}
           >
             <GoogleIcon />
@@ -195,6 +228,7 @@ function AuthPage() {
             variant="outline"
             className="h-11 w-full rounded-full text-sm font-medium"
             style={providerButtonStyle}
+            disabled={busy || (mode === "signup" && !legalAccepted)}
             onClick={() => void handleOAuth("lovable")}
           >
             <span className="mr-2 text-base leading-none">◆</span>
@@ -255,7 +289,7 @@ function AuthPage() {
             </p>
           )}
 
-          <Button type="submit" size="lg" className="w-full rounded-full" disabled={busy}>
+          <Button type="submit" size="lg" className="w-full rounded-full" disabled={busy || (mode === "signup" && !legalAccepted)}>
             {mode === "signin" ? "შესვლა" : "რეგისტრაცია"}
           </Button>
         </form>

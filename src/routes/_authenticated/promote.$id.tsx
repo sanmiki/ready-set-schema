@@ -5,7 +5,9 @@ import { Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { LegalConsent } from "@/components/site/LegalConsent";
 import { getPromoteCheckout, purchasePromotion } from "@/lib/promotions.functions";
+import { paidServiceConsentError } from "@/lib/legal";
 import {
   DURATIONS,
   quoteLines,
@@ -54,6 +56,7 @@ function PromotePage() {
   const [highlight, setHighlight] = useState(false);
   const [bump, setBump] = useState<BumpMode>("none");
   const [busy, setBusy] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [key, setKey] = useState(() => crypto.randomUUID());
 
   const choice = { tier, days, highlight, bump };
@@ -74,9 +77,14 @@ function PromotePage() {
 
   async function pay() {
     if (total === 0 || !enough || !live) return;
+    const consentError = paidServiceConsentError(total, legalAccepted);
+    if (consentError) {
+      toast.error(consentError);
+      return;
+    }
     setBusy(true);
     try {
-      const result = await purchasePromotion({ data: { productId: id, tier, days, highlight, bump, key } });
+      const result = await purchasePromotion({ data: { productId: id, tier, days, highlight, bump, key, legalConsent: { accepted: legalAccepted, key } } });
       if (!result.ok) {
         toast.error(result.message);
         return;
@@ -214,9 +222,21 @@ function PromotePage() {
               <span className="text-2xl font-semibold tracking-tight">{formatTetri(total)}</span>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">ბალანსი: {formatTetri(data.balance)}</p>
+            {total > 0 && (
+              <div className="mt-4">
+                <LegalConsent
+                  id="promotion-legal-consent"
+                  checked={legalAccepted}
+                  onChange={setLegalAccepted}
+                  kind="promotion"
+                  amountTetri={total}
+                  disabled={busy}
+                />
+              </div>
+            )}
             <Button
               className="mt-5 h-12 w-full rounded-full"
-              disabled={busy || total === 0 || !enough || !live}
+              disabled={busy || total === 0 || !enough || !live || !legalAccepted}
               onClick={() => void pay()}
             >
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}

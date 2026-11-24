@@ -7,6 +7,7 @@ import { EmptyState, ProductCard } from "@/components/site/ProductCard";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { ContactSeller } from "@/components/site/ContactSeller";
 import { ReportListing } from "@/components/site/ReportListing";
+import { LegalConsent } from "@/components/site/LegalConsent";
 import { PhoneContact, WhatsAppContact } from "@/components/site/SellerContact";
 import {
   AlertDialog,
@@ -25,6 +26,7 @@ import { listingPublicPhone, listingWhatsapp } from "@/lib/contact.functions";
 import { conditionLabel, formatDate, formatPrice, statusLabel } from "@/lib/labels";
 import { visibleContactPhone } from "@/lib/phone";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
+import { formatTetri } from "@/lib/pricing";
 import { listingQuery, myListingQuery, relatedListingsQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/product/$id")({
@@ -62,6 +64,10 @@ function ProductPage() {
   const { user } = useSession();
   const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [consentAmount, setConsentAmount] = useState(50);
+  const [consentKey] = useState(() => crypto.randomUUID());
 
   const { data: mine } = useQuery({
     ...myListingQuery(id),
@@ -89,9 +95,18 @@ function ProductPage() {
   const cover = images[activeImage] ?? images[0] ?? null;
   const isOwner = !!mine;
 
-  async function changeStatus(status: "active" | "reserved" | "sold" | "draft") {
-    const result = await setListingStatus({ data: { id, status } });
+  async function changeStatus(
+    status: "active" | "reserved" | "sold" | "draft",
+    legalConsent?: { accepted: boolean; key: string },
+  ) {
+    const result = await setListingStatus({ data: { id, status, legalConsent: legalConsent ?? null } });
     if (!result.ok) {
+      if ("consentRequired" in result && result.consentRequired) {
+        setConsentAmount(result.amountTetri ?? 50);
+        setLegalAccepted(false);
+        setConsentOpen(true);
+        return;
+      }
       toast.error(result.message);
       return;
     }
@@ -271,6 +286,33 @@ function ProductPage() {
           <EmptyState title="ამ ნივთს ფოტო არ აქვს" text="მალე გავაუმჯობესებთ." />
         </div>
       )}
+
+      <AlertDialog open={consentOpen} onOpenChange={setConsentOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ფასიანი გამოქვეყნების დადასტურება</AlertDialogTitle>
+            <AlertDialogDescription>
+              გამოქვეყნების საფასურია {formatTetri(consentAmount)}. თანხა ბალანსიდან ჩამოიჭრება მხოლოდ დადასტურების შემდეგ.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <LegalConsent
+            id={`product-publish-consent-${id}`}
+            checked={legalAccepted}
+            onChange={setLegalAccepted}
+            kind="listing"
+            amountTetri={consentAmount}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>გაუქმება</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!legalAccepted}
+              onClick={() => void changeStatus("active", { accepted: true, key: consentKey })}
+            >
+              გადახდა და გამოქვეყნება
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,7 +16,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { LegalConsent } from "@/components/site/LegalConsent";
 import { deleteListing, setListingStatus } from "@/lib/seller.functions";
+import { formatTetri } from "@/lib/pricing";
 import { formatPrice, statusLabel } from "@/lib/labels";
 import { myListingsQuery } from "@/lib/queries";
 import type { Listing } from "@/lib/types";
@@ -73,13 +76,27 @@ function MyItemsPage() {
 
 function ItemRow({ listing }: { listing: Listing }) {
   const queryClient = useQueryClient();
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [consentAmount, setConsentAmount] = useState(50);
+  const [consentKey, setConsentKey] = useState(() => crypto.randomUUID());
 
-  async function changeStatus(status: "active" | "reserved" | "sold" | "draft") {
-    const result = await setListingStatus({ data: { id: listing.id, status } });
+  async function changeStatus(
+    status: "active" | "reserved" | "sold" | "draft",
+    legalConsent?: { accepted: boolean; key: string },
+  ) {
+    const result = await setListingStatus({ data: { id: listing.id, status, legalConsent: legalConsent ?? null } });
     if (!result.ok) {
+      if ("consentRequired" in result && result.consentRequired) {
+        setConsentAmount(result.amountTetri ?? 50);
+        setLegalAccepted(false);
+        setConsentOpen(true);
+        return;
+      }
       toast.error(result.message);
       return;
     }
+    setConsentKey(crypto.randomUUID());
     toast.success("სტატუსი განახლდა");
     await queryClient.invalidateQueries({ queryKey: ["my-listings"] });
   }
@@ -95,6 +112,7 @@ function ItemRow({ listing }: { listing: Listing }) {
   }
 
   return (
+    <>
     <div className="flex flex-wrap items-center gap-4 surface p-3">
       <div className="h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
         {listing.images[0]?.src && (
@@ -173,5 +191,32 @@ function ItemRow({ listing }: { listing: Listing }) {
         </AlertDialog>
       </div>
     </div>
+    <AlertDialog open={consentOpen} onOpenChange={setConsentOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>ფასიანი გამოქვეყნების დადასტურება</AlertDialogTitle>
+          <AlertDialogDescription>
+            ამ განცხადების გამოქვეყნების საფასურია {formatTetri(consentAmount)}. თანხა ბალანსიდან ჩამოიჭრება მხოლოდ დადასტურების შემდეგ.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <LegalConsent
+          id={`publish-consent-${listing.id}`}
+          checked={legalAccepted}
+          onChange={setLegalAccepted}
+          kind="listing"
+          amountTetri={consentAmount}
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel>გაუქმება</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={!legalAccepted}
+            onClick={() => void changeStatus("active", { accepted: true, key: consentKey })}
+          >
+            გადახდა და გამოქვეყნება
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

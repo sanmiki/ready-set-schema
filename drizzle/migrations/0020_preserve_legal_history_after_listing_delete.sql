@@ -1,0 +1,1 @@
+ALTER TABLE public.legal_acceptances DROP CONSTRAINT IF EXISTS legal_acceptances_product_id_fkey;

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Baby, ImagePlus, Loader2, User, UserRound, Users, X } from "lucide-react";
 import { CategoryCombobox } from "./CategoryCombobox";
+import { LegalConsent } from "./LegalConsent";
 import { conditionLabel, formatPrice } from "@/lib/labels";
 import { toast } from "sonner";
 
@@ -25,6 +26,7 @@ import { DURATIONS, TIERS, quoteLines, quoteTotal, type BumpMode, type Promotion
 import { cn } from "@/lib/utils";
 import { myWalletQuery } from "@/lib/queries";
 import { audienceRequired, categoryNotAllowed, firstMessage, listingFieldsSchema, type ListingFields } from "@/lib/validation";
+import { LEGAL_CONSENT_REQUIRED } from "@/lib/legal";
 
 const selectClass =
   "h-11 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/20";
@@ -107,6 +109,12 @@ export function ListingForm({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [promo, setPromo] = useState<PromotionChoice>({ tier: null, days: 3, highlight: false, bump: "none" });
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [consentKey] = useState(() => crypto.randomUUID());
+  const { data: walletForConsent } = useQuery(myWalletQuery(user?.id ?? null));
+  const { data: pricesForConsent } = useQuery({ queryKey: PRICES_KEY, queryFn: () => getPromotionPrices() });
+  const paidConsentRequired = mode === "create" && ((walletForConsent?.nextFee ?? 0) > 0 || hasPaidPromo(promo));
+  const pricingLoading = mode === "create" && hasPaidPromo(promo) && !pricesForConsent;
 
   const totalPhotos = keptPhotos.length + newPhotos.length;
   const firstNew = newPhotos[0];
@@ -211,6 +219,13 @@ export function ListingForm({
       return;
     }
 
+    if (paidConsentRequired && !legalAccepted) {
+      setError(LEGAL_CONSENT_REQUIRED);
+      toast.error(LEGAL_CONSENT_REQUIRED);
+      document.getElementById("sec-summary")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
     setBusy(true);
     try {
       if (mode === "create") {
@@ -243,7 +258,7 @@ export function ListingForm({
         }
 
         const published = await finalizeListing({
-          data: { id: created.id, paths: uploaded, publish: true, promo },
+          data: { id: created.id, paths: uploaded, publish: true, promo, legalConsent: { accepted: legalAccepted, key: consentKey } },
         });
         if (!published.ok) {
           // The listing is saved as a draft; retry from "my items" instead of creating a duplicate.
@@ -599,7 +614,7 @@ export function ListingForm({
       </Section>
 
       {mode === "create" && <PromoSection choice={promo} onChange={setPromo} />}
-      {mode === "create" && <PriceSummary choice={promo} />}
+      {mode === "create" && <PriceSummary choice={promo} accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />}
 
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -608,7 +623,7 @@ export function ListingForm({
       )}
 
       <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-border bg-background/90 px-4 py-3 backdrop-blur-md sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-        <Button type="submit" size="lg" className="h-12 flex-1 rounded-full px-8 sm:flex-none" disabled={busy}>
+        <Button type="submit" size="lg" className="h-12 flex-1 rounded-full px-8 sm:flex-none" disabled={busy || pricingLoading || (paidConsentRequired && !legalAccepted)}>
           {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />}
           {mode === "create" ? "გამოქვეყნება" : "ცვლილებების შენახვა"}
         </Button>
@@ -761,7 +776,7 @@ function PromoSection({ choice, onChange }: { choice: PromotionChoice; onChange:
   );
 }
 
-function PriceSummary({ choice }: { choice: PromotionChoice }) {
+function PriceSummary({ choice, accepted, onAcceptedChange }: { choice: PromotionChoice; accepted: boolean; onAcceptedChange: (checked: boolean) => void }) {
   const { user } = useSession();
   const { data: wallet } = useQuery(myWalletQuery(user?.id ?? null));
   const { data: prices } = useQuery({ queryKey: PRICES_KEY, queryFn: () => getPromotionPrices() });
@@ -802,6 +817,17 @@ function PriceSummary({ choice }: { choice: PromotionChoice }) {
             ? "თანხა ბალანსიდან ჩამოიჭრება გამოქვეყნებისას."
             : "ბალანსი არასაკმარისია — ნივთი მონახაზად შეინახება გადახდამდე. ონლაინ გადახდა მალე დაემატება."}
         </p>
+      )}
+      {paid && (
+        <div className="mt-4">
+          <LegalConsent
+            id="listing-legal-consent"
+            checked={accepted}
+            onChange={onAcceptedChange}
+            kind="listing"
+            amountTetri={total}
+          />
+        </div>
       )}
       <p className="mt-2 text-xs text-muted-foreground">პრომო არასავალდებულოა. რედაქტირება უფასოა.</p>
     </Section>
